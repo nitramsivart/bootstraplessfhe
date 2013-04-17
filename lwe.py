@@ -2,7 +2,7 @@ import random
 import math
 
 def generate_error(q):
-  return random.randint(0, 0)#q>>69)
+  return random.randint(0, q>>20)
 
 def dot(v1, v2):
   sum = 0
@@ -15,7 +15,10 @@ def dot(v1, v2):
 # by the encryptions
 def bitwisemult(l, h, q, logq):
   cipherfn = 0
+  print h
   posh = (h + q) % q
+  if posh < 0:
+    print "OUTRAGE"
   for tau in range(logq):
     hnew = (posh>>tau)%2
     if hnew == 1:
@@ -32,7 +35,7 @@ class Sk:
     self.tvars = PolynomialRing(Integers(q),n,"t").gens()
     self.t = self.randlist(q)
     self.sencrypts = [self.encrypt2(self.s[i]) for i in range(n)]
-    self.s2encrypts = [[self.encrypt2(self.s[i]*self.s[j]) for i in range(n)] for j in range(n)]
+    self.s2encrypts = [[self.encrypt2(self.s[i]*self.s[j]) for j in range(n)] for i in range(n)]
 
   def randlist(self, q):
     return [random.randint(0, int(q**(1))) for i in range(self.n)]
@@ -83,13 +86,12 @@ class Sk:
   def decrypt(self, f, key):
     return f(key).lift().mod(2)
 
-sk = Sk(2**10, 2)
+sk = Sk(2**30, 1024)
 f1 = sk.encrypt1(1)
 print f1
 f2 = sk.encrypt1(1)
 print f2
 f3 = f1*f2
-print f3
-f4 = sk.relinearize(f3)
-print f4
-print sk.decrypt(f4, sk.t)
+#f4 = sk.relinearize(f3)
+#print f4
+print sk.decrypt(f3, sk.s)
