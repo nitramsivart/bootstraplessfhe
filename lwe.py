@@ -2,7 +2,7 @@ import random
 import math
 
 def generate_error(q):
-  return random.randint(0, q**int(1.0/16))
+  return random.randint(0, 0)#q>>69)
 
 def dot(v1, v2):
   sum = 0
@@ -13,10 +13,11 @@ def dot(v1, v2):
 # takes a list of encryptions, an h coefficient
 # and returns the coefficient decomposed and multiplied
 # by the encryptions
-def bitwisemult(l, h, logq):
+def bitwisemult(l, h, q, logq):
   cipherfn = 0
+  posh = (h + q) % q
   for tau in range(logq):
-    hnew = (h>>tau)%2
+    hnew = (posh>>tau)%2
     if hnew == 1:
       cipherfn = cipherfn + l[tau]
   return cipherfn
@@ -34,7 +35,7 @@ class Sk:
     self.s2encrypts = [[self.encrypt2(self.s[i]*self.s[j]) for i in range(n)] for j in range(n)]
 
   def randlist(self, q):
-    return [random.randint(0, int(q**1)) for i in range(self.n)]
+    return [random.randint(0, int(q**(1))) for i in range(self.n)]
 
 
   # first level of encrypt
@@ -69,25 +70,26 @@ class Sk:
     #compute linear terms
     lin = [f.coefficient(self.svars[i])([0]*n) for i in range(n)]
     for i in range(n):
-      newf = newf + bitwisemult(self.sencrypts[i], f.coefficient(self.svars[i])([0]*n), self.logq)
+      newf = newf + bitwisemult(self.sencrypts[i], f.coefficient(self.svars[i])([0]*n), self.q, self.logq)
     for i in range(n):
       for j in range(n):
         if i == j:
           coeff = f.coefficient(self.svars[i]**2)
         else:
           coeff = (f.coefficient(self.svars[i])).coefficient(self.svars[j])
-        newf = newf + bitwisemult(self.s2encrypts[i][j], coeff([0]*n), self.logq)
+        newf = newf + bitwisemult(self.s2encrypts[i][j], coeff([0]*n), self.q, self.logq)
     return newf
 
-  def decrypt(self, f):
-    return f(self.s).lift().mod(2)
+  def decrypt(self, f, key):
+    return f(key).lift().mod(2)
 
-sk = Sk(2**40, 2)
+sk = Sk(2**10, 2)
 f1 = sk.encrypt1(1)
 print f1
-f2 = sk.encrypt1(0)
+f2 = sk.encrypt1(1)
+print f2
 f3 = f1*f2
 print f3
 f4 = sk.relinearize(f3)
 print f4
-print sk.decrypt(f3)
+print sk.decrypt(f4, sk.t)
