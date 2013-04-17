@@ -26,7 +26,6 @@ class Sk:
   # first level of encrypt
   def encrypt1(self, m):
     a = self.randlist(self.q)
-    print a
     e = generate_error(self.q)
     b = dot(a, self.s) + 2*e + m
     f = b
@@ -42,6 +41,7 @@ class Sk:
     f = b
     for i in range(self.n):
       f = f - a[i] * self.tvars[i]
+    return f
 
   # turns a quadratic function into a linear function
   def relinearize(self, f):
@@ -58,8 +58,8 @@ class Sk:
           coeff = f.coefficient(self.svars[i]**2)
         else:
           coeff = (f.coefficient(self.svars[i])).coefficient(self.svars[j])
-        newf = newf + self.sencrypts[i][j]
-    return quad
+        newf = newf + self.s2encrypts[i][j] * coeff([0]*n)
+    return newf
 
   def decrypt(self, f):
     return f(self.s).lift().mod(2)
@@ -72,4 +72,4 @@ f3 = f1*f2
 print f3
 f4 = sk.relinearize(f3)
 print f4
-#print sk.decrypt(f4)
+print sk.decrypt(f4)
