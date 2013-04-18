@@ -14,7 +14,7 @@ def main():
   t = randlist(q, n)
   tvars = PolynomialRing(Integers(q), n, "t").gens()
 
-  si_encryptions, sisj_encryptions = generate_substitutions(s, t, tvars, q, n)
+  si_substitutions, sisj_substitutions = generate_substitutions(s, t, tvars, q, n)
 
   # main logic
   print "encrypting bit - please wait"
@@ -38,19 +38,19 @@ def main():
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
 def generate_substitutions(s, t, tvars, q, n):
-  si_encryptions = []
-  sisj_encryptions = []
+  si_subs = []
+  sisj_subs = []
   # encrypt each s[i]
   for i in range(0, len(s)):
-    (a, b) = encrypt(s[i], t, tvars, q, n)[0]
-    si_encryptions.append(b - dot(a, t))
+    (a, b) = encrypt(s[i], t, tvars, q)[0]
+    si_subs.append(b - dot(a, t))
   # encrypt each s[i]s[j]
   for i in range(0, len(s)):
-    sisj_encryptions.append([])
+    sisj_subs.append([])
     for j in range(0, len(s)):
-      (a, b) = encrypt(s[i]*s[j], t, tvars, q, n)[0]
-      sisj_encryptions[i].append(b - dot(a, t))
-  return si_encryptions, sisj_encryptions
+      (a, b) = encrypt(s[i]*s[j], t, tvars, q)[0]
+      sisj_subs[i].append(b - dot(a, t))
+  return si_subs, sisj_subs
 
 def generate_error(q):
   return random.randint(0, q>>20)
