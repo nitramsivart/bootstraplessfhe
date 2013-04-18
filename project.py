@@ -5,7 +5,6 @@ def main():
   # public info 
   q = 2**10
   n = 10
-  logq = int(math.ceil(math.log(q, 2)))
 
   # private info
   s = randlist(q, n)
@@ -21,43 +20,34 @@ def main():
   _,f1 = encrypt(1, s, svars, q)
   print "encrypting bit - please wait"
   _,f2 = encrypt(1, s, svars, q)
-  print "adding bit - please wait"
-  f3 = f1+f2
-  print "multiplying bit - please wait"
-  f4 = f1*f2
-  print "relinearizing"
-  f5 = relinearize(f4, svars, n, q, logq, si_subs, sisj_subs)
+  print "multiplying and relinearizing bit - please wait"
+  f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
 
-  print "decrypting bit - please wait"
-  print decrypt(f1, s)
-  print "decrypting bit - please wait"
-  print decrypt(f2, s)
-  print "decrypting answer - please wait"
-  print decrypt(f3, s)
-  print "decrypting relinearized bit (woo!)"
-#  print decrypt(f4, t)
+  print "decrypting relinearization (1*1) bit (woo!)"
+  print decrypt(f3, t)
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
 def generate_substitutions(s, t, tvars, q, n):
+  logq = int(math.floor(math.log(q, 2)))
   si_subs = []
   sisj_subs = []
   # encrypt each s[i]
   for i in range(len(s)):
-    (a, b),_ = encrypt(s[i], t, tvars, q)
-    si_subs.append(b - dot(a, t))
+    _,f = encrypt(s[i], t, tvars, q)
+    si_subs.append(f)
   # encrypt each s[i]s[j]
   for i in range(len(s)):
     sisj_subs.append([])
     for j in range(i):
       sisj_subs[i].append([])
       for tau in range(logq):
-        (a, b),_ = encrypt(s[i]*s[j], t, tvars, q)
-        sisj_subs[i][j].append(b - dot(a, t))
+        _,f = encrypt((2**tau*s[i]*s[j]), t, tvars, q)
+        sisj_subs[i][j].append(f)
   return si_subs, sisj_subs
 
 def generate_error(q):
-  return random.randint(0, q>>20)
+  return random.randint(0, 0)
 
 def dot(v1, v2):
   sum = 0
@@ -77,25 +67,22 @@ def encrypt(m, s, svars, q):
 
 # decrypt the ciphertext c
 def decrypt(c, key):
-  return c(key).lift().mod(2)
-
-def bitwisemult(s, h, logq):
-  c = 0
-  for tau in range(logq):
-    hbit = (h >> tau) % 2
-    c += s[tau]*hbit
-  return c
+  return c(key).lift() % 2
 
 # server side functions
-def relinearize(f, svars, n, q, logq, si_subs, sisj_subs):
+def relinearize(f, svars, n, q, si_subs, sisj_subs):
   g = f([0 for i in range(n)])
   for i in range(n):
-    coeff = f.coefficient(svars[i])([0]*n)
-    g += coeff*si_subs[i]
+    hi = f.coefficient(svars[i])([0]*n)
+    g += hi*si_subs[i]
   for i in range(n):
     for j in range(i):
-      coeff = f.coefficient(svars[i]*svars[j])([0]*n)
-      g += bitwisemult(sisj_subs[i][j], coeff, q, logq)
+      hij = f.coefficient(svars[i]*svars[j])([0]*n)
+      logq = int(math.floor(math.log(q,2)))
+      for tau in range(logq):
+        hbit = ((hij >> tau) % 2).lift()
+        g += hbit*sisj_subs[i][j][tau]
+  print g
   return g
 
 main()
