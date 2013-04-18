@@ -62,7 +62,7 @@ def dot(v1, v2):
   return sum
 
 def randlist(q, n):
-  return [random.randint(0, q) for i in range(n)]
+  return (random.randint(0, q) for i in range(n))
 
 # encrypt the bit m
 def encrypt(m, s, svars, q):
