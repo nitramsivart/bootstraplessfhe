@@ -50,8 +50,9 @@ def generate_substitutions(s, t, tvars, q, n):
   for i in range(len(s)):
     sisj_subs.append([])
     for j in range(i):
-      (a, b),_ = encrypt(s[i]*s[j], t, tvars, q)
-      sisj_subs[i].append(b - dot(a, t))
+      for tau in range(logq):
+        (a, b),_ = encrypt(s[i]*s[j], t, tvars, q)
+        sisj_subs[i].append(b - dot(a, t))
   return si_subs, sisj_subs
 
 def generate_error(q):
