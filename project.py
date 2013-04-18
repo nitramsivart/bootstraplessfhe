@@ -78,19 +78,19 @@ def encrypt(m, s, svars, q):
 def decrypt(c, key):
   return c(key).lift().mod(2)
 
-def bitwisemult(s, h, q, logq):
-  cipherfn = 0
-  posh = (h+1) % q
+def bitwisemult(s, h, logq):
+  c = 0
   for tau in range(logq):
-    hnew = (posh >> tau) % 2
-    cipherfn += s[tau]*hnew
-  return cipherfn
+    hbit = (h >> tau) % 2
+    c += s[tau]*hbit
+  return c
 
 # server side functions
 def relinearize(f, svars, n, q, logq, si_subs, sisj_subs):
   g = f([0 for i in range(n)])
   for i in range(n):
-    g += f.coefficient(svars[i])([0]*n)*si_subs[i]
+    coeff = f.coefficient(svars[i])([0]*n)
+    g += coeff*si_subs[i]
   for i in range(n):
     for j in range(i):
       coeff = f.coefficient(svars[i]*svars[j])([0]*n)
