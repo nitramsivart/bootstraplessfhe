@@ -78,15 +78,17 @@ class Sk:
       for j in range(n):
         if i == j:
           coeff = f.coefficient(self.svars[i]**2)
-        else:
+        elif i < j:
           coeff = (f.coefficient(self.svars[i])).coefficient(self.svars[j])
+        else:
+          coeff = 0
         newf = newf + bitwisemult(self.s2encrypts[i][j], coeff([0]*n), self.q, self.logq)
     return newf
 
   def decrypt(self, f, key):
     return f(key).lift().mod(2)
 
-sk = Sk(2**30, 1024)
+sk = Sk(2**20, 10)
 f1 = sk.encrypt1(1)
 print f1
 f2 = sk.encrypt1(1)
