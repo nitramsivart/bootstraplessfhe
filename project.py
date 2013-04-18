@@ -24,16 +24,17 @@ def main():
   print "adding bit - please wait"
   f3 = f1+f2
   print "multiplying bit - please wait"
-  f4 = f1*f2
+#  f4 = f1*f2
   print "relinearizing"
-  f5 = relinearize(f4, svars, n)
+#  f5 = relinearize(f4, svars, n)
 
   print "decrypting bit - please wait"
   print decrypt(f1, s)
   print "decrypting bit - please wait"
   print decrypt(f2, s)
   print "decrypting relinearized bit (woo!)"
-  print decrypt(f4, t)
+  print decrypt(f3, s)
+#  print decrypt(f4, t)
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
