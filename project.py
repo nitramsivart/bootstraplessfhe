@@ -32,8 +32,9 @@ def main():
   print decrypt(f1, s)
   print "decrypting bit - please wait"
   print decrypt(f2, s)
-  print "decrypting relinearized bit (woo!)"
+  print "decrypting answer - please wait"
   print decrypt(f3, s)
+  print "decrypting relinearized bit (woo!)"
 #  print decrypt(f4, t)
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
@@ -63,7 +64,7 @@ def dot(v1, v2):
   return sum
 
 def randlist(q, n):
-  return (random.randint(0, q) for i in range(n))
+  return [random.randint(0, q) for i in range(n)]
 
 # encrypt the bit m
 def encrypt(m, s, svars, q):
