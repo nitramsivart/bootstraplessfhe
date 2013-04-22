@@ -4,7 +4,7 @@ import math
 def main():
   # public info 
   q = 2**10
-  n = 10
+  n = 20
 
   # private info
   s = randlist(q, n)
@@ -16,15 +16,27 @@ def main():
   si_subs, sisj_subs = generate_substitutions(s, t, tvars, q, n)
 
   # main logic
-  print "encrypting bit - please wait"
+  print "\n\n\nEncryption of 1:"
   _,f1 = encrypt(1, s, svars, q)
-  print "encrypting bit - please wait"
-  _,f2 = encrypt(1, s, svars, q)
-  print "multiplying and relinearizing bit - please wait"
-  f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
+  print f1
+  print "\nEncryption of 0:"
+  _,f2 = encrypt(0, s, svars, q)
+  print f2
+  print "\nEncryption of 0 + 1:"
+  fadd = f1+f2
+  print fadd
+  print "\nDecrypted:", decrypt(fadd, s)
+  raw_input()
 
-  print "decrypting relinearization (1*1) bit (woo!)"
-  print decrypt(f3, t)
+  print "\n\nEncryption of 0 * 1:"
+  fmult = f1 * f2
+  print fmult
+  print "\nRelinearized:"
+  f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
+  print f3
+
+  print "\nDecrypted:", decrypt(f3, t)
+
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
@@ -39,7 +51,7 @@ def generate_substitutions(s, t, tvars, q, n):
   # encrypt each s[i]s[j]
   for i in range(len(s)):
     sisj_subs.append([])
-    for j in range(i):
+    for j in range(i+1):
       sisj_subs[i].append([])
       for tau in range(logq):
         _,f = encrypt((2**tau*s[i]*s[j]), t, tvars, q)
@@ -47,7 +59,7 @@ def generate_substitutions(s, t, tvars, q, n):
   return si_subs, sisj_subs
 
 def generate_error(q):
-  return random.randint(0, 0)
+  return random.randint(0, 1)
 
 def dot(v1, v2):
   sum = 0
@@ -76,13 +88,12 @@ def relinearize(f, svars, n, q, si_subs, sisj_subs):
     hi = f.coefficient(svars[i])([0]*n)
     g += hi*si_subs[i]
   for i in range(n):
-    for j in range(i):
+    for j in range(i+1):
       hij = f.coefficient(svars[i]*svars[j])([0]*n)
       logq = int(math.floor(math.log(q,2)))
       for tau in range(logq):
         hbit = ((hij >> tau) % 2).lift()
         g += hbit*sisj_subs[i][j][tau]
-  print g
   return g
 
 main()

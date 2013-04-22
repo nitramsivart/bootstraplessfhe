@@ -81,7 +81,7 @@ class Sk:
         elif i < j:
           coeff = (f.coefficient(self.svars[i])).coefficient(self.svars[j])
         else:
-          coeff = 0
+          continue
         newf = newf + bitwisemult(self.s2encrypts[i][j], coeff([0]*n), self.q, self.logq)
     return newf
 
@@ -94,6 +94,9 @@ print f1
 f2 = sk.encrypt1(1)
 print f2
 f3 = f1*f2
-#f4 = sk.relinearize(f3)
-#print f4
-print sk.decrypt(f3, sk.s)
+f4 = sk.relinearize(f3)
+print sk.decrypt(f4, sk.t)
+
+for i in range(5):
+  for j in range(i):
+    print i, j
