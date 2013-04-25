@@ -141,7 +141,7 @@ def modulusReduction(f, svars, n, q, si_subs):
   for i in range(n):
     hi = f.coefficient(svars[i])([0]*n)
     for tau in range(logq):
-      hbit = ((hi >> tau) % 2).lift()
+      hbit = (int(hi) >> tau) % 2
       g += hbit*si_subs[i][tau]
   return g
 
