@@ -48,6 +48,8 @@ def main():
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
   fmod = modulusReduction(f1, svars, n, q, si_subs)
+  print "\nMod Switched"
+  print fmod
   print "\nDecrypted:", decrypt(fmod, z)
 
 
@@ -78,7 +80,7 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = round(p/q * 2**tau * s[i])
+      m = int(round(p/q * 2**tau * s[i]))
       _,f = MR_encrypt(m, t, tvars, p)
       si_subs[i].append(round(q/p) * f)
   return si_subs
@@ -137,7 +139,7 @@ def modulusReduction(f, svars, n, q, si_subs):
   logq = int(math.floor(math.log(q,2)))
   g = f([0 for i in range(n)])
   for i in range(n):
-    hi = f.coefficient(svars[i])
+    hi = f.coefficient(svars[i])([0]*n)
     for tau in range(logq):
       hbit = ((hi >> tau) % 2).lift()
       g += hi*si_subs[i][tau]
