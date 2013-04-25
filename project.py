@@ -26,7 +26,6 @@ def main():
   fadd = f1+f2
   print fadd
   print "\nDecrypted:", decrypt(fadd, s)
-  raw_input()
 
   print "\n\nEncryption of 0 * 1:"
   fmult = f1 * f2
@@ -42,7 +41,7 @@ def main():
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = 2**5
+  p = 2**9
   k = 5
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
@@ -82,7 +81,7 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
     for tau in range(logq):
       m = int(round(p/q * 2**tau * s[i]))
       _,f = MR_encrypt(m, t, tvars, p)
-      si_subs[i].append(round(q/p) * f)
+      si_subs[i].append(int(round(q/p)) * f)
   return si_subs
 
 def generate_error(q):
