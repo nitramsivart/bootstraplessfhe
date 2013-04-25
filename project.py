@@ -3,7 +3,7 @@ import math
 
 def main():
   # public info 
-  q = 2**9
+  q = 2**60
   n = 1
 
   # private info
@@ -43,7 +43,7 @@ def main():
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = 2**9
+  p = 2**60
   k = 1
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
@@ -81,8 +81,10 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = int(round(float(p)/float(q) * 2**tau * s[i]))
+      m = int(round(float(p)* 2**tau * s[i]/float(q)))
       _,f = MR_encrypt(m, t, tvars, p)
+      print f
+      print int(q/float(p)) * f
       si_subs[i].append(int(q/float(p)) * f)
   return si_subs
 
