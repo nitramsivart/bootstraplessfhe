@@ -58,6 +58,18 @@ def generate_substitutions(s, t, tvars, q, n):
         sisj_subs[i][j].append(f)
   return si_subs, sisj_subs
 
+def generate_MR_subsitutions(s, t, tvars, q, p, n, k)
+  logq = int(math.floor(math.log(q,2)))
+  si_subs = []
+  # encrypt p/q 2**tau s[i]
+  for i in range(len(s)):
+    si_subs.append([])
+    for tau in range(logq):
+      m = math.round(p/q * 2**tau * s[i])
+      _,f = MR_encrypt(m, t, tvars, p)
+      si_subs[i].append(f)
+  return si_subs
+
 def generate_error(q):
   return random.randint(0, 1)
 
@@ -77,12 +89,19 @@ def encrypt(m, s, svars, q):
   b = dot(a, s) + 2*e + m
   return (a, b), b - dot(a, svars)
 
+def MR_encrypt(m, t, tvars, p):
+  a = randlist(p, len(tvars))
+  e = generate_error(p)
+  b = dot(a,t) + e + m
+  return (a, b), b - dot(a, tvars)
+
 # decrypt the ciphertext c
 def decrypt(c, key):
   return c(key).lift() % 2
 
 # server side functions
 def relinearize(f, svars, n, q, si_subs, sisj_subs):
+  logq = int(math.floor(math.log(q,2)))
   g = f([0 for i in range(n)])
   for i in range(n):
     hi = f.coefficient(svars[i])([0]*n)
@@ -90,10 +109,25 @@ def relinearize(f, svars, n, q, si_subs, sisj_subs):
   for i in range(n):
     for j in range(i+1):
       hij = f.coefficient(svars[i]*svars[j])([0]*n)
-      logq = int(math.floor(math.log(q,2)))
       for tau in range(logq):
         hbit = ((hij >> tau) % 2).lift()
         g += hbit*sisj_subs[i][j][tau]
+  return g
+
+# The goal of this function is to tak a ciphertext (n, logq)
+# and convert it to a ciphertext (k, logp) where k<n and p<q
+# k ~ lambda, p = poly(k).
+
+# To do this properly, we need to set our parameters according
+# to page 7 paragraph 1
+def modulusReduction(f, svars, n, q, si_subs):
+  logq = int(math.floor(math.log(q,2)))
+  g = f([0 for i in range(n)])
+  for i in range(n):
+    hi = f.coefficient(svars[i])
+    for tau in range(logq):
+      hbit = ((hi >> tau) % 2).lift()
+      g += hi*si_subs[i][tau]
   return g
 
 main()
