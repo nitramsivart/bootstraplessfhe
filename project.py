@@ -37,6 +37,19 @@ def main():
 
   print "\nDecrypted:", decrypt(f3, t)
 
+  print "\nTesting Modulus Dimension Reduction"
+  _,f1 = encrypt(1, s, svars, q)
+  print "\nEncryption of 1:"
+  print f1
+  print "\nModulus Switching"
+  p = 2**5
+  k = 5
+  z = randlist(p, k)
+  zvars = PolynomialRing(Integers(p), k, "z").gens()
+  si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+  fmod = modulusReduction(f1, svars, n, q, si_subs)
+  print "\nDecrypted:", decrypt(fmod, z)
+
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
@@ -58,14 +71,14 @@ def generate_substitutions(s, t, tvars, q, n):
         sisj_subs[i][j].append(f)
   return si_subs, sisj_subs
 
-def generate_MR_subsitutions(s, t, tvars, q, p, n, k)
+def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   logq = int(math.floor(math.log(q,2)))
   si_subs = []
   # encrypt p/q 2**tau s[i]
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = math.round(p/q * 2**tau * s[i])
+      m = round(p/q * 2**tau * s[i])
       _,f = MR_encrypt(m, t, tvars, p)
       si_subs[i].append(f)
   return si_subs
@@ -90,9 +103,9 @@ def encrypt(m, s, svars, q):
   return (a, b), b - dot(a, svars)
 
 def MR_encrypt(m, t, tvars, p):
-  a = randlist(p, len(tvars))
+  a = randlist(p, len(t))
   e = generate_error(p)
-  b = dot(a,t) + e + m
+  b = dot(a, t) + e + m
   return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
@@ -130,7 +143,7 @@ def modulusReduction(f, svars, n, q, si_subs):
       g += hi*si_subs[i][tau]
   return g
 
-def bootstrap(f, svars, n, q, ti_encrypt)
+def bootstrap(f, svars, n, q, ti_encrypt):
   g= modulusReduction(f, svars, n, q, si_subs)
   m = (dot(g, ti_encrypt) % p).lift() % 2
   h = modulusReduction(f, tvars, k, p, ti_subs)
