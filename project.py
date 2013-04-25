@@ -80,7 +80,7 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
     for tau in range(logq):
       m = round(p/q * 2**tau * s[i])
       _,f = MR_encrypt(m, t, tvars, p)
-      si_subs[i].append(f)
+      si_subs[i].append(round(q/p) * f)
   return si_subs
 
 def generate_error(q):
@@ -106,7 +106,7 @@ def MR_encrypt(m, t, tvars, p):
   a = randlist(p, len(t))
   e = generate_error(p)
   b = dot(a, t) + e + m
-  return (a, b), round(q / p) * (b - dot(a, tvars))
+  return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
 def decrypt(c, key):
