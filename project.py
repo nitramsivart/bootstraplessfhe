@@ -106,7 +106,7 @@ def MR_encrypt(m, t, tvars, p):
   a = randlist(p, len(t))
   e = generate_error(p)
   b = dot(a, t) + e + m
-  return (a, b), b - dot(a, tvars)
+  return (a, b), round(q / p) * (b - dot(a, tvars))
 
 # decrypt the ciphertext c
 def decrypt(c, key):
