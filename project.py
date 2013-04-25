@@ -81,7 +81,7 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
     for tau in range(logq):
       m = int(round(p/q * 2**tau * s[i]))
       _,f = MR_encrypt(m, t, tvars, p)
-      si_subs[i].append(int(round(q/p)) * f)
+      si_subs[i].append(q/p * f)
   return si_subs
 
 def generate_error(q):
@@ -141,7 +141,7 @@ def modulusReduction(f, svars, n, q, si_subs):
     hi = f.coefficient(svars[i])([0]*n)
     for tau in range(logq):
       hbit = ((hi >> tau) % 2).lift()
-      g += hi*si_subs[i][tau]
+      g += hbit*si_subs[i][tau]
   return g
 
 def bootstrap(f, svars, n, q, ti_encrypt):
