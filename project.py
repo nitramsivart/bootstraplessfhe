@@ -3,7 +3,7 @@ import math
 
 def main():
   # public info 
-  q = 2**10
+  q = 2**10 + 1
   n = 20
 
   # private info
@@ -41,7 +41,7 @@ def main():
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = 2**9
+  p = 2**9 + 1
   k = 5
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
@@ -124,7 +124,8 @@ def relinearize(f, svars, n, q, si_subs, sisj_subs):
     for j in range(i+1):
       hij = f.coefficient(svars[i]*svars[j])([0]*n)
       for tau in range(logq):
-        hbit = ((hij >> tau) % 2).lift()
+        print hij, tau
+        hbit = (int(hij) >> tau) % 2
         g += hbit*sisj_subs[i][j][tau]
   return g
 
@@ -136,12 +137,12 @@ def relinearize(f, svars, n, q, si_subs, sisj_subs):
 # to page 7 paragraph 1
 def modulusReduction(f, svars, n, q, si_subs):
   logq = int(math.floor(math.log(q,2)))
-  g = f([0 for i in range(n)])
+  g = f([0 for i in range(n)]).lift()
   for i in range(n):
     hi = f.coefficient(svars[i])([0]*n)
     for tau in range(logq):
-      hbit = ((hi >> tau) % 2).lift()
-      g += hi*si_subs[i][tau]
+      hbit = (int(hi) >> tau) % 2
+      g += hi.lift()*si_subs[i][tau]
   return g
 
 def bootstrap(f, svars, n, q, ti_encrypt):
