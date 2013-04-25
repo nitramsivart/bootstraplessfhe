@@ -3,13 +3,14 @@ import math
 
 def main():
   # public info 
-  q = 2**10 + 1
-  n = 20
+  q = 2**9
+  n = 1
 
   # private info
   s = randlist(q, n)
   svars = PolynomialRing(Integers(q), n, "s").gens()
 
+  '''
   t = randlist(q, n)
   tvars = PolynomialRing(Integers(q), n, "t").gens()
 
@@ -35,14 +36,15 @@ def main():
   print f3
 
   print "\nDecrypted:", decrypt(f3, t)
+  '''
 
   print "\nTesting Modulus Dimension Reduction"
   _,f1 = encrypt(1, s, svars, q)
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = 2**9 + 1
-  k = 5
+  p = 2**9
+  k = 1
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -75,13 +77,13 @@ def generate_substitutions(s, t, tvars, q, n):
 def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   logq = int(math.floor(math.log(q,2)))
   si_subs = []
-  # encrypt p/q 2**tau s[i]
+  # encrypt 2**tau s[i]
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = int(round(p/q * 2**tau * s[i]))
+      m = int(round(float(p)/float(q) * 2**tau * s[i]))
       _,f = MR_encrypt(m, t, tvars, p)
-      si_subs[i].append(q/p * f)
+      si_subs[i].append(int(q/float(p)) * f)
   return si_subs
 
 def generate_error(q):
@@ -124,7 +126,6 @@ def relinearize(f, svars, n, q, si_subs, sisj_subs):
     for j in range(i+1):
       hij = f.coefficient(svars[i]*svars[j])([0]*n)
       for tau in range(logq):
-        print hij, tau
         hbit = (int(hij) >> tau) % 2
         g += hbit*sisj_subs[i][j][tau]
   return g
