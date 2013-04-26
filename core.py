@@ -6,8 +6,8 @@ def main():
   # public info 
   #q = 2**100
   #n = 50
-  q = 2**50
-  n = 10
+  q = 2**40
+  n = 5
 
   # private info
   s = randlist(q, n)
@@ -62,8 +62,8 @@ def main():
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = q>>1
-  k = n-5
+  p = q>>8
+  k = n-1
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -80,10 +80,22 @@ def main():
     si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
     fmod = modulusReduction(f1, svars, n, q, si_subs)
 
-    print decrypt(fmod,z)
+    #print decrypt(fmod,z)
     if(decrypt(fmod, z) != 1):
       print "fail!"
-  print "success!"
+      break
+    if i == 39:
+      print "success!"
+
+  '''
+  print si_subs
+  print z
+  print f1
+  print s
+  print decrypt(f1, s)
+  print fmod
+  '''
+
 
 #keyname must be a string, the same as the polynomial variable (aka, "s" or "t" or etc.)
 def keygen(n, q, keyname):
@@ -124,12 +136,13 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = round( p * (2**tau) * s[i] / q )
-      _,f = MR_encrypt(m, t, tvars, p)
-      si_subs[i].append(int(Fraction(q, p)) * f)
+      m = Fraction(p * (2**tau) * s[i], q)
+      _,f = MR_encrypt(m, t, tvars, q, p)
+      si_subs[i].append(f)
   return si_subs
 
 def generate_error(q):
+  return random.randint(0, 1)
   return random.randint(0, q)
 
 def dot(v1, v2):
@@ -149,12 +162,13 @@ def encrypt(m, s, svars, q):
   b = dot(a, s) + 2*e + m
   return (a, b), b - dot(a, svars)
 
-def MR_encrypt(m, t, tvars, p):
+# did some weird stuff to make sure we don't round too soon
+def MR_encrypt(m, t, tvars, q, p):
   logp = int(math.floor(math.log(p,2)))
   a = randlist(p, len(t))
   e = generate_error(logp)
-  b = dot(a, t) + 2*e + int(m)
-  return (a, b), b - dot(a, tvars)
+  b = Fraction(q,p) * (dot(a, t) + e + m)
+  return (a, b), int(b) - int(Fraction(q,p)) * dot(a, tvars)
 
 # decrypt the ciphertext c
 def decrypt(c, key):
