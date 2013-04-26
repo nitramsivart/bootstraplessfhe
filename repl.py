@@ -1,6 +1,7 @@
 import os
 #from core import keygen, encrypt, decrypt
 import core
+from time import time
 
 banner = """-----------------------------------------------------------------
 |            LWE-BASED FULLY HOMOMORPHIC ENCRYPTION             |
@@ -111,15 +112,25 @@ temp_op = []
 needs_parens = False
 
 #These global variables are used for the cryptographic functions
-n = 5
-q = 2**10
+k = 50
+n = k**4
+q = 2**(k**2)
+p = n**2 * math.log(q,2) * k**2
+m = n * math.log(q,2)
+
 keynames = ["s"]
 keys = []
 key_vars = []
 subs = []
 
 #These global variables are params for the REPL
-verbose = True  
+verbose = True
+
+#These globab variables are for storing information on clock timings
+add_timer = []
+mult_timer = []
+key_gen_timer = []
+
 
 def main():
   global verbose
@@ -139,7 +150,7 @@ def main():
     #read
     input = raw_input(prompt)
     input = input.lower().strip()
-  
+
     #eval
     if (input == "about" or input == "aboot"):
        print(about)
@@ -165,6 +176,19 @@ def main():
         print "\n   Unexpected syntax: " + input + "\n" + ((22 + expanded_index(input, error_index)) * " ") + "^\n   Type 'help' for more info\n"
       else:
         evaluate(input)
+        if verbose == True:
+          print "\n   Operation Statistics  \n"
+          print "\n ------------------------\n"
+          print "\n   Addition time : ", sum(add_timer), "s\n"
+          print "\n      Mean       : ", mean(add_timer), "s\n"
+          print "\n      Stand Dev  : ", std(add_timer), "s\n"
+          print "\n      Minimum    : ", min(add_timer), "s\n"
+          print "\n      Maximum    : ", max(add_timer), "s\n"
+          print "\n   Multiply time : ", sum(mult_timer), "s\n"
+          print "\n      Mean       : ", mean(mult_timer), "s\n"
+          print "\n      Stand Dev  : ", std(mult_timer), "s\n"
+          print "\n      Minimum    : ", min(mult_timer), "s\n"
+          print "\n      Maximum    : ", max(mult_timer), "s\n"
 
 def evaluate(func_str):
   global keys
@@ -172,9 +196,15 @@ def evaluate(func_str):
   ops = get_ops(func_str)
   # calulate number of subs needed here?
   for keyname in keynames:
+    timer = time()
     pk, pk_vars = keygen(n,q,keyname)
+    key_gen_timer.append(time() - timer)
     keys.append(pk)
     key_vars.append(pk_vars)
+  if verbose == True:
+    print "\n   Key generation averaged: ", mean(key_gen_times), "s\n"
+    print "\n   With standard deviation: ", std(key_gen_times), "s\n"
+    print "\n   Key generation completed in ", sum(key_gen_times), "s\n"
   encrypted_result = recursive_resolve(ops)
   if verbose == True:
     print "\n   Encrypted answer: ", encrypted_result, "\n"
@@ -231,9 +261,13 @@ def recursive_resolve(nested_ops):
 
   # Perform the operations!
   if operator == "+":
+    timer = time()
     result = fhe_add(er_operand, el_operand)
+    add_time.append( time() - timer )
   elif operator == "*":
+    timer = time()
     result = fhe_mult(er_operand, el_operand)
+    mult_time.append( time() - timer )
 
   return result
 

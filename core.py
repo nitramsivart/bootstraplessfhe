@@ -2,16 +2,42 @@ import random
 import math
 from fractions import Fraction
 
+def test_relinearize(s, svars, q, n):
+  si_subs, sisj_subs = generate_substitutions(s, s, svars, q, n)
+  print "\n\n\nEncryption of 1:"
+  _,f1 = encrypt(1, s, svars, q)
+  print f1
+  print "\nEncryption of 0:"
+  _,f2 = encrypt(0, s, svars, q)
+  print f2
+  print "\nEncryption of 0 + 1:"
+  fadd = f1+f2
+  print fadd
+  print "\nDecrypted:", decrypt(fadd, s)
+
+  print "\n\nEncryption of 0 * 1:"
+  fmult = f1 * f2
+  print fmult
+  print "\nRelinearized:"
+  f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
+  print f3
+
+  print "\nDecrypted:", decrypt(f3, s)
+
+
 def main():
   # public info 
-  #q = 2**100
-  #n = 50
-  q = 2**100
-  n = 6
+  q = 2**50
+  n = 10
 
   # private info
   s = randlist(q, n)
   svars = PolynomialRing(Integers(q), n, "s").gens()
+
+  #testing
+  test_relinearize(s, svars, q, n)
+
+  return
 
   '''
   t = randlist(q, n)
@@ -64,6 +90,7 @@ def main():
   print "\nModulus Switching"
   p = q>>8
   k = n-2
+
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -96,13 +123,14 @@ def main():
   print fmod
   '''
 
-
 #keyname must be a string, the same as the polynomial variable (aka, "s" or "t" or etc.)
 def keygen(n, q, keyname):
   pk = randlist(q, n)
   pk_vars = sage.rings.polynomial.polynomial_ring_constructor.PolynomialRing(Integers(q), n, keyname).gens()
   return pk, pk_vars
 
+# TODO: needs access to si_subs, sisj_subs, level
+# so that we can do re-linearize and mod-switch
 def fhe_mult(f1, f2):
   return f1*f2
 
@@ -158,7 +186,7 @@ def encrypt(m, s, svars, q):
   logq = int(math.floor(math.log(q,2)))
   a = randlist(q, len(s))
   e = generate_error(logq)
-  b = dot(a, s) + 2*e + m
+  b = dot(a, s) + 2*e + int(round(m))
   return (a, b), b - dot(a, svars)
 
 # did some weird stuff to make sure we don't round too soon
