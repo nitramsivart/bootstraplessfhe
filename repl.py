@@ -1,5 +1,5 @@
 import os
-
+import core
 
 banner = """-----------------------------------------------------------------
 |            LWE-BASED FULLY HOMOMORPHIC ENCRYPTION             |
@@ -87,15 +87,33 @@ help = """
 
 prompt = "> "
 
-#These two global variables are used by the recursive descent parser functions
+#These global variables are used by the recursive descent parser functions
 func_to_parse = ""
 token = "" 
 current_index = -1
 error_index = -1
 terminal_char = "$"
 
+#These global variables are used by the parser to construct a stack of operations
+final_result = -1
+l_result = -1
+r_result = -1
+op_stack = []
+temp_op = []
+needs_parens = False
+
+#These global variables are used for the cryptographic functions
+n = 5
+q = 2**10
+keynames = ["s"]
+keys = []
+key_vars = []
+subs = []
+
+#These global variables are params for the REPL
+verbose = True  
+
 def main():
-  verbose = True  
   clear()
   #run welcome 
   print banner
@@ -137,7 +155,76 @@ def main():
       if (is_valid == False):
         print "\n   Unexpected syntax: " + input + "\n" + ((22 + expanded_index(input, error_index)) * " ") + "^\n   Type 'help' for more info\n"
       else:
-        print "\n   " + str(eval(input)) + "\n"
+        evaluate(input)
+
+def evaluate(func_str):
+  global keys
+  global key_vars
+  ops = get_ops(func_str)
+  # calulate number of subs needed here?
+  for keyname in keynames:
+    pk, pk_vars = keygen(n,q,keyname)
+    keys.append(pk)
+    key_vars.append(pk_vars)
+  encrypted_result = recursive_resolve(ops)
+  if verbose == True:
+    print "\n   Encrypted answer: ", encrypted_result, "\n"
+  print "\n   Decrypted answer: ", decrypt(encrypted_result, keys[0]), "\n"
+
+def get_ops(func_str):
+  func_str = strip_ws(func_str)
+  top_level_list = []
+  indices = []
+  level_index = -1
+#  current_list = []
+  if needs_parens:
+    func_str = "(" + func_str + ")"
+  for i in range(1, len(func_str)):
+    c = func_str[i]
+    if (c == "("):
+      new_list = []
+      indices.append(level_index+1)
+      level = top_level_list
+      for i in range(len(indices)-1):
+        level = level[indices[i]]
+      level.append(new_list)
+    elif (c == ")"):
+      if len(indices) > 0:
+        level_index = indices.pop()
+    else:
+      level = top_level_list
+      for i in range(len(indices)):
+        level = level[indices[i]]
+      level.append(c)
+      level_index += 1
+  return top_level_list
+
+def recursive_resolve(nested_ops):
+  l_operand = nested_ops[0]
+  operator = nested_ops[1]
+  r_operand = nested_ops[2]
+
+  # Resolve the operands recursively
+  if l_operand != "0" and l_operand != "1":
+    el_operand = recursive_resolve(l_operand)
+  else:
+    _, el_operand = encrypt(int(l_operand), keys[0], key_vars[0], q)
+    if verbose == True:
+      print "\n   Encrypted ", l_operand, " as: ", el_operand, "\n"
+  if r_operand != "0" and r_operand != "1":
+    er_operand = recursive_resolve(r_operand)
+  else:
+    _, er_operand = encrypt(int(r_operand), keys[0], key_vars[0], q)
+    if verbose == True:
+      print "\n   Encrypted ", r_operand, " as: ", er_operand, "\n"
+
+  # Perform the operations!
+  if operator == "+":
+    result = fhe_add(er_operand, el_operand)
+  elif operator == "*":
+    result = fhe_mult(er_operand, el_operand)
+
+  return result
 
 def clear():
   os_name = os.name
@@ -147,19 +234,20 @@ def clear():
     os.system('CLS')
 
 def param_menu():
+  print "params"
 
 ### RECURSIVE DESCENT PARSER FUNCTIONS ###
-
 def parse_expression(input):
   global func_to_parse
   global current_index
   global error_index
+  global needs_parens
   current_index = -1
   error_index = -1
   func_to_parse = input
+  needs_parens = False
   #strip func of all whitespace
-  func_to_parse = func_to_parse.expandtabs()
-  func_to_parse = func_to_parse.replace(" ", "")
+  func_to_parse = strip_ws(func_to_parse)
   func_to_parse = func_to_parse + terminal_char
   next()
   is_valid = expression()
@@ -172,7 +260,6 @@ def next():
   global current_index
   current_index += 1
   token = func_to_parse[current_index]
-  #print "index: " + str(current_index) + " token: " + str(token) #TEST
 
 def match(constant):
   if (token == constant):
@@ -204,11 +291,14 @@ def expression():
 
 def binary_operation():
   global error_index
+  global needs_parens
   t = token
   c = current_index
   if (operand() and operator() and operand()):
+    needs_parens = True
     return True
   elif (restore(t, c) and match("(") and operand() and operator() and operand() and match(")")):
+    needs_parens = False
     return True
   else:
     if (current_index > error_index):
@@ -280,6 +370,11 @@ def expanded_index(original_str, index_sans_spaces):
     if (c != " " and c != "\t"):
       char_count += 1
   return index_with_spaces
+
+def strip_ws(s):
+  s = s.expandtabs()
+  s = s.replace(" ", "")
+  return s
 
 if __name__ == '__main__':
   main()
