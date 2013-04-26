@@ -62,7 +62,7 @@ def main():
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = q>>1
+  p = q
   k = n-5
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
@@ -112,7 +112,7 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = round( p * (2**tau) * s[i] / q )
+      m = round( (p * (2**tau) * s[i]) / q )
       _,f = MR_encrypt(m, t, tvars, p)
       si_subs[i].append(int(Fraction(q, p)) * f)
   return si_subs
@@ -134,14 +134,14 @@ def encrypt(m, s, svars, q):
   logq = int(math.floor(math.log(q,2)))
   a = randlist(q, len(s))
   e = generate_error(logq)
-  b = dot(a, s) + 2*e + m
+  b = dot(a, s) + 2*e + int(round(m))
   return (a, b), b - dot(a, svars)
 
 def MR_encrypt(m, t, tvars, p):
   logp = int(math.floor(math.log(p,2)))
   a = randlist(p, len(t))
   e = generate_error(logp)
-  b = dot(a, t) + 2*e + m
+  b = dot(a, t) + 2*e + int(round(m))
   return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
