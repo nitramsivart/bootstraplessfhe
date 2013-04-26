@@ -112,7 +112,7 @@ temp_op = []
 needs_parens = False
 
 #These global variables are used for the cryptographic functions
-k = 3#5
+k = 5
 n = k**2#k**4
 q = 2**(k**2)
 p = n**2 * math.log(q,2) * k**2
@@ -201,9 +201,7 @@ def evaluate(func_str):
   key_gen_timer.append(time() - timer)
 
   if verbose == True:
-    print "   KEY GNERATION TIME STATS:"
-    print "   Key generation averaged: ", mean(key_gen_timer), "s"
-    print "   With standard deviation: ", std(key_gen_timer, bias=True), "s"
+    print "   KEY GENRATION TIME STATS:"
     print "   Key generation completed in ", sum(key_gen_timer), "s"
   encrypted_result, depth = recursive_resolve(ops)
   if verbose == True:
