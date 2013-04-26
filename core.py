@@ -6,8 +6,8 @@ def main():
   # public info 
   #q = 2**100
   #n = 50
-  q = 2**40
-  n = 5
+  q = 2**100
+  n = 6
 
   # private info
   s = randlist(q, n)
@@ -63,7 +63,7 @@ def main():
   print f1
   print "\nModulus Switching"
   p = q>>8
-  k = n-1
+  k = n-2
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -142,7 +142,6 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   return si_subs
 
 def generate_error(q):
-  return random.randint(0, 1)
   return random.randint(0, q)
 
 def dot(v1, v2):
