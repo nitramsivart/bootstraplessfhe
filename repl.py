@@ -112,7 +112,7 @@ temp_op = []
 needs_parens = False
 
 #These global variables are used for the cryptographic functions
-k = 50
+k = 5
 n = k**4
 q = 2**(k**2)
 p = n**2 * math.log(q,2) * k**2
@@ -126,7 +126,7 @@ subs = []
 #These global variables are params for the REPL
 verbose = True
 
-#These globab variables are for storing information on clock timings
+#These global variables are for storing information on clock timings
 add_timer = []
 mult_timer = []
 key_gen_timer = []
@@ -193,6 +193,8 @@ def main():
 def evaluate(func_str):
   global keys
   global key_vars
+  keys = []
+  key_vars = []
   ops = get_ops(func_str)
   # calulate number of subs needed here?
   for keyname in keynames:
@@ -202,9 +204,9 @@ def evaluate(func_str):
     keys.append(pk)
     key_vars.append(pk_vars)
   if verbose == True:
-    print "\n   Key generation averaged: ", mean(key_gen_times), "s\n"
-    print "\n   With standard deviation: ", std(key_gen_times), "s\n"
-    print "\n   Key generation completed in ", sum(key_gen_times), "s\n"
+    print "\n   Key generation averaged: ", mean(key_gen_timer), "s\n"
+    print "\n   With standard deviation: ", std(key_gen_timer), "s\n"
+    print "\n   Key generation completed in ", sum(key_gen_timer), "s\n"
   encrypted_result = recursive_resolve(ops)
   if verbose == True:
     print "\n   Encrypted answer: ", encrypted_result, "\n"
@@ -310,7 +312,7 @@ def set_n():
     input = raw_input("\n   Enter new value for n (or <enter> to escape): ")
     if input == "":
       valid_input = True
-      print "\n   No changes made.\n"
+      print "\n   No changes made."
     elif is_int(input):
       input = int(input)
       if input >= 1: 
@@ -329,7 +331,7 @@ def set_q():
     input = raw_input("\n   Enter new value for q (or <enter> to escape): ")
     if input == "":
       valid_input = True
-      print "\n   No changes made.\n"
+      print "\n   No changes made."
     elif is_int(input):
       input = int(input)
       if input >= 2:
