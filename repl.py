@@ -28,6 +28,8 @@ or
 
 into the shell. Some other useful commands:
 
+                   clear           clear the screen
+
                    about           see credits
 
                    help            see a list of commands
@@ -61,7 +63,9 @@ help = """
 
    verbosity on    see encryptions of data/results and the keys
 
-   verbosity off   turn off that stuff
+   verbosity off   turn off that 
+
+   clear           clear the screen
 
    about           see credits
 
@@ -74,12 +78,10 @@ help = """
 
                      (((0 * 1) + 1) + (1 + 0))
 
-   Don't forget the spaces!
+   Whitespace doesn't matter.
    """
 
 prompt = "> "
-
-parse_error = "\n   Sorry, we did not understand the query. Type 'help' for more info.\n"
 
 #These two global variables are used by the recursive descent parser functions
 func_to_parse = ""
@@ -105,14 +107,20 @@ def main():
   while (input != "exit"):
     #read
     input = raw_input(prompt)
-    
-        #eval
-    if (input == "about"):
+    input = input.lower().strip()
+  
+    #eval
+    if (input == "about" or input == "aboot"):
        print(about)
     elif (input == "help"):
       print(help)
-    elif (input == "exit"):
+    elif (input == "exit" or input == "quit"):
       break
+    elif (input == "clear"):
+      clear()
+      print banner
+    elif (input == ""):
+      print ""
     elif (input == "verbosity on"):
       verbose = True
     elif (input == "verbosity off"):
@@ -121,7 +129,7 @@ def main():
       #equation parsing
       is_valid, tree = parse_expression(input)
       if (is_valid == False):
-        print "\n   Unexpected syntax: " + input + "\n" + ((22 + expanded_index(input, error_index)) * " ") + "^\n"
+        print "\n   Unexpected syntax: " + input + "\n" + ((22 + expanded_index(input, error_index)) * " ") + "^\n   Type 'help' for more info\n"
       else:
         print "\n   " + str(eval(input)) + "\n"
 
@@ -174,9 +182,12 @@ def restore(temp_token, temp_current_index):
   return True
 
 def expression():
+  global error_index
   if (binary_operation() and end()):
     return True
   else:
+    if (current_index > error_index):
+      error_index = current_index
     return False
 
 def binary_operation():
@@ -188,10 +199,12 @@ def binary_operation():
   elif (restore(t, c) and match("(") and operand() and operator() and operand() and match(")")):
     return True
   else:
-    error_index = current_index
+    if (current_index > error_index):
+      error_index = current_index
     return False
 
 def operand():
+  global error_index
   t = token
   c = current_index
   if (match("(") and binary_operation() and match(")")):
@@ -199,22 +212,30 @@ def operand():
   elif (restore(t, c) and constant()):
     return True
   else:
+    if (current_index > error_index):
+      error_index = current_index
     return False
 
 def constant():
+  global error_index
   if match("0"):
     return True
   elif match("1"):
     return True
   else:
+    if (current_index > error_index):
+      error_index = current_index
     return False
 
 def operator():
+  global error_index
   if match("+"):
     return True
   elif match("*"):
     return True
   else:
+    if (current_index > error_index):
+      error_index = current_index
     return False
 
 def end():
