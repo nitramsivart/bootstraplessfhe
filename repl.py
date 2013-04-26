@@ -1,4 +1,5 @@
 import os
+#from core import keygen, encrypt, decrypt
 import core
 from time import time
 
@@ -86,6 +87,13 @@ help = """
    Whitespace doesn't matter.
    """
 
+param_msg = """
+   PARAMS:
+
+   [0] n                 {0}\t\tNumber of terms in polynomials. 
+   [1] q                 {1}\t\tPolynomial coefficients are chosen from Z mod q.
+"""
+
 prompt = "> "
 
 #These global variables are used by the recursive descent parser functions
@@ -116,9 +124,16 @@ key_vars = []
 subs = []
 
 #These global variables are params for the REPL
-verbose = True  
+verbose = True
+
+#These globab variables are for storing information on clock timings
+add_timer = []
+mult_timer = []
+key_gen_timer = []
+
 
 def main():
+  global verbose
   clear()
   #run welcome 
   print banner
@@ -135,7 +150,7 @@ def main():
     #read
     input = raw_input(prompt)
     input = input.lower().strip()
-  
+
     #eval
     if (input == "about" or input == "aboot"):
        print(about)
@@ -161,23 +176,35 @@ def main():
         print "\n   Unexpected syntax: " + input + "\n" + ((22 + expanded_index(input, error_index)) * " ") + "^\n   Type 'help' for more info\n"
       else:
         evaluate(input)
+        if verbose == True:
+          print "\n   Operation Statistics  \n"
+          print "\n ------------------------\n"
+          print "\n   Addition time : ", sum(add_timer), "s\n"
+          print "\n      Mean       : ", mean(add_timer), "s\n"
+          print "\n      Stand Dev  : ", std(add_timer), "s\n"
+          print "\n      Minimum    : ", min(add_timer), "s\n"
+          print "\n      Maximum    : ", max(add_timer), "s\n"
+          print "\n   Multiply time : ", sum(mult_timer), "s\n"
+          print "\n      Mean       : ", mean(mult_timer), "s\n"
+          print "\n      Stand Dev  : ", std(mult_timer), "s\n"
+          print "\n      Minimum    : ", min(mult_timer), "s\n"
+          print "\n      Maximum    : ", max(mult_timer), "s\n"
 
 def evaluate(func_str):
   global keys
   global key_vars
   ops = get_ops(func_str)
   # calulate number of subs needed here?
-  key_gen_times = []
   for keyname in keynames:
-    key_gen_start = time()
+    timer = time()
     pk, pk_vars = keygen(n,q,keyname)
-    key_gen_times.append(time() - key_gen_start)
+    key_gen_timer.append(time() - timer)
     keys.append(pk)
     key_vars.append(pk_vars)
   if verbose == True:
-    print "\n   Key generation averaged: ", mean(key_gen_times), "ms\n"
-    print "\n   With standard deviation: ", std(key_gen_times), "ms\n"
-    print "\n   Key generation completed in ", sum(key_gen_times), "ms\n"
+    print "\n   Key generation averaged: ", mean(key_gen_times), "s\n"
+    print "\n   With standard deviation: ", std(key_gen_times), "s\n"
+    print "\n   Key generation completed in ", sum(key_gen_times), "s\n"
   encrypted_result = recursive_resolve(ops)
   if verbose == True:
     print "\n   Encrypted answer: ", encrypted_result, "\n"
@@ -195,11 +222,13 @@ def get_ops(func_str):
     c = func_str[i]
     if (c == "("):
       new_list = []
-      indices.append(level_index+1)
+      level_index += 1
+      indices.append(level_index)
       level = top_level_list
       for i in range(len(indices)-1):
         level = level[indices[i]]
       level.append(new_list)
+      level_index = -1
     elif (c == ")"):
       if len(indices) > 0:
         level_index = indices.pop()
@@ -232,9 +261,13 @@ def recursive_resolve(nested_ops):
 
   # Perform the operations!
   if operator == "+":
+    timer = time()
     result = fhe_add(er_operand, el_operand)
+    add_time.append( time() - timer )
   elif operator == "*":
+    timer = time()
     result = fhe_mult(er_operand, el_operand)
+    mult_time.append( time() - timer )
 
   return result
 
@@ -246,7 +279,67 @@ def clear():
     os.system('CLS')
 
 def param_menu():
-  print "params"
+  input = "foo"
+  while (input != ""):
+    valid_input = False
+    while (not valid_input):
+      print param_msg.format(n, q, True)
+      input = raw_input("   Select a number to change a parameter or hit <enter> to continue: ")
+      if input == "":
+        valid_input = True
+        print ""
+      elif is_int(input):
+        input = int(input)
+        if input == 0:
+          valid_input = True
+          set_n()
+          print ""
+        elif input == 1:
+          valid_input = True
+          set_q()
+          print ""
+        else:
+          raw_input("\n   Not one of the options. Try again!")
+      else:
+        raw_input("\n   Must be a non-negative integer or <enter>. Try again!")
+
+def set_n():
+  global n
+  valid_input = False
+  while (not valid_input):
+    input = raw_input("\n   Enter new value for n (or <enter> to escape): ")
+    if input == "":
+      valid_input = True
+      print "\n   No changes made.\n"
+    elif is_int(input):
+      input = int(input)
+      if input >= 1: 
+        valid_input = True
+        n = input
+        raw_input("\n   Successfully set n to be " + str(input) + ".")
+      else:
+        raw_input("\n   Must be an integer greater than zero.")
+    else:
+      raw_input("\n   Must be a positive integer or <enter>. Try again!")
+
+def set_q():
+  global q
+  valid_input = False
+  while (not valid_input):
+    input = raw_input("\n   Enter new value for q (or <enter> to escape): ")
+    if input == "":
+      valid_input = True
+      print "\n   No changes made.\n"
+    elif is_int(input):
+      input = int(input)
+      if input >= 2:
+        valid_input = True
+        q = input
+        raw_input("\n   Successfully set q to be " + str(input) + ".")
+      else:
+        raw_input("\n   Must be an integer greater than one.")
+    else:
+      raw_input("\n   Must be an integer greater than one or <enter>. Try again!")
 
 ### RECURSIVE DESCENT PARSER FUNCTIONS ###
 def parse_expression(input):
@@ -387,6 +480,15 @@ def strip_ws(s):
   s = s.expandtabs()
   s = s.replace(" ", "")
   return s
+
+def is_int(s):
+  is_int = True
+  digits = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+  for char in s:
+    if char not in digits:
+      is_int = False
+  return is_int
+
 
 if __name__ == '__main__':
   main()
