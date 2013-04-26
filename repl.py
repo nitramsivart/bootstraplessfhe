@@ -208,15 +208,10 @@ def evaluate(func_str):
     keys.append(pk)
     key_vars.append(pk_vars)
   if verbose == True:
-<<<<<<< HEAD
-    print "\n   Key generation averaged: ", mean(key_gen_timer), "s\n"
-    print "\n   With standard deviation: ", std(key_gen_timer), "s\n"
-    print "\n   Key generation completed in ", sum(key_gen_timer), "s\n"
-=======
+    print "   KEY GNERATION TIME STATS:"
     print "   Key generation averaged: ", mean(key_gen_timer), "s"
     print "   With standard deviation: ", std(key_gen_timer, bias=True), "s"
     print "   Key generation completed in ", sum(key_gen_timer), "s"
->>>>>>> 9bccd8463bb919d75d012e75919763adb10640d0
   encrypted_result = recursive_resolve(ops)
   if verbose == True:
     print "\n   Encrypted answer: ", encrypted_result, "\n"
