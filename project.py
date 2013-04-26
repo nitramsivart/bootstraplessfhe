@@ -129,13 +129,14 @@ def randlist(q, n):
 def encrypt(m, s, svars, q):
   a = randlist(q, len(s))
   e = generate_error(q)
+  #e = 0
   b = dot(a, s) + 2*e + m
   return (a, b), b - dot(a, svars)
 
 def MR_encrypt(m, t, tvars, p):
   a = randlist(p, len(t))
   e = generate_error(p)
-  b = dot(a, t) + 2*e + m
+  b = dot(a, t) + e + m
   return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
