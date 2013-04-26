@@ -2,16 +2,42 @@ import random
 import math
 from fractions import Fraction
 
+def test_relinearize(s, svars, q, n):
+  si_subs, sisj_subs = generate_substitutions(s, s, svars, q, n)
+  print "\n\n\nEncryption of 1:"
+  _,f1 = encrypt(1, s, svars, q)
+  print f1
+  print "\nEncryption of 0:"
+  _,f2 = encrypt(0, s, svars, q)
+  print f2
+  print "\nEncryption of 0 + 1:"
+  fadd = f1+f2
+  print fadd
+  print "\nDecrypted:", decrypt(fadd, s)
+
+  print "\n\nEncryption of 0 * 1:"
+  fmult = f1 * f2
+  print fmult
+  print "\nRelinearized:"
+  f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
+  print f3
+
+  print "\nDecrypted:", decrypt(f3, s)
+
+
 def main():
   # public info 
-  #q = 2**100
-  #n = 50
-  q = 2**100
-  n = 6
+  q = 2**50
+  n = 10
 
   # private info
   s = randlist(q, n)
   svars = PolynomialRing(Integers(q), n, "s").gens()
+
+  #testing
+  test_relinearize(s, svars, q, n)
+
+  return
 
   '''
   t = randlist(q, n)
@@ -103,6 +129,8 @@ def keygen(n, q, keyname):
   pk_vars = sage.rings.polynomial.polynomial_ring_constructor.PolynomialRing(Integers(q), n, keyname).gens()
   return pk, pk_vars
 
+# TODO: needs access to si_subs, sisj_subs, level
+# so that we can do re-linearize and mod-switch
 def fhe_mult(f1, f2):
   return f1*f2
 
