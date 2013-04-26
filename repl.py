@@ -118,9 +118,7 @@ q = 2**(k**2)
 p = n**2 * math.log(q,2) * k**2
 m = n * math.log(q,2)
 
-keynames = ["s"]
 keys = []
-key_vars = []
 subs = []
 
 #These global variables are params for the REPL
@@ -194,7 +192,8 @@ def main():
 
 def evaluate(func_str):
   global keys
-  global key_vars
+  global subs
+  keys, subs = make_substitutions(q
   keys = []
   key_vars = []
   ops = get_ops(func_str)

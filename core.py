@@ -4,22 +4,16 @@ from fractions import Fraction
 
 def test_mult(keys, subs):
   d = 0
-  print "\n\n\nEncryption of 1:"
   _,f1 = encrypt(1, keys[d], subs['varnames'][d], subs['p'][d])
-  print f1
-  print "\nEncryption of 0:"
   _,f2 = encrypt(0, keys[d], subs['varnames'][d], subs['p'][d])
-  print f2
-  print "\nEncryption of 0 + 1:"
   fadd = fhe_add(f1, f2)
-  print fadd
   print "\nDecrypted:", decrypt(fadd, keys[d])
 
-  print "\n\nEncryption of 0 * 1:"
+  print "Encryption of 0 * 1:"
   f3 = fhe_mult(f1, f2, d, d, subs)
   print f3
 
-  print "\nDecrypted:", decrypt(f3, keys[d+1])
+  print "Decrypted:", decrypt(f3, keys[d+1])
 
 # adjusts q, n to the appropriate multiplication depth
 # this probably isn't quite what we want
