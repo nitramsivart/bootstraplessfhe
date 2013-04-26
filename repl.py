@@ -183,7 +183,11 @@ def restore(temp_token, temp_current_index):
 
 def expression():
   global error_index
+  t = token
+  c = current_index
   if (binary_operation() and end()):
+    return True
+  elif restore(t, c) and constant() and end():
     return True
   else:
     if (current_index > error_index):
