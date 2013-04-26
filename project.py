@@ -4,7 +4,9 @@ from fractions import Fraction
 
 def main():
   # public info 
-  q = 2**51
+  #q = 2**100
+  #n = 50
+  q = 2**50
   n = 10
 
   # private info
@@ -60,8 +62,8 @@ def main():
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = 2**50
-  k = 10
+  p = q>>1
+  k = n-5
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -77,6 +79,8 @@ def main():
     zvars = PolynomialRing(Integers(p), k, "z").gens()
     si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
     fmod = modulusReduction(f1, svars, n, q, si_subs)
+
+    print decrypt(fmod,z)
     if(decrypt(fmod, z) != 1):
       print "fail!"
   print "success!"
@@ -108,13 +112,13 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = p * (2**tau) * s[i] / q
+      m = round( p * (2**tau) * s[i] / q )
       _,f = MR_encrypt(m, t, tvars, p)
       si_subs[i].append(int(Fraction(q, p)) * f)
   return si_subs
 
 def generate_error(q):
-  return random.randint(0, 1)
+  return random.randint(0, q)
 
 def dot(v1, v2):
   sum = 0
@@ -127,16 +131,17 @@ def randlist(q, n):
 
 # encrypt the bit m
 def encrypt(m, s, svars, q):
+  logq = int(math.floor(math.log(q,2)))
   a = randlist(q, len(s))
-  e = generate_error(q)
-  #e = 0
+  e = generate_error(logq)
   b = dot(a, s) + 2*e + m
   return (a, b), b - dot(a, svars)
 
 def MR_encrypt(m, t, tvars, p):
+  logp = int(math.floor(math.log(p,2)))
   a = randlist(p, len(t))
-  e = generate_error(p)
-  b = dot(a, t) + e + m
+  e = generate_error(logp)
+  b = dot(a, t) + 2*e + m
   return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
