@@ -198,6 +198,9 @@ def evaluate(func_str):
   keys = []
   key_vars = []
   ops = get_ops(func_str)
+  chained_mult_count, tree_depth = get_depth_info(ops)
+  print "Mult count: ", chained_mult_count
+  print "Max depth: ", max_depth
   # calulate number of subs needed here?
   for keyname in keynames:
     #timer = cputime(subprocesses=True)
@@ -246,6 +249,34 @@ def get_ops(func_str):
       level.append(c)
       level_index += 1
   return top_level_list
+
+# returns the largest number of multiplications in
+# the same path on the syntax tree
+# also returns depth
+def get_depth_info(nested_ops):
+  l_operand = nested_ops[0]
+  operator = nested_ops[1]
+  r_operand = nested_ops[2]
+  right_count = 0
+  left_count = 0
+  right_depth = 0
+  left_depth = 0
+
+  if operator == "*":
+    mult_count = 1
+  else:
+    mult_count = 0
+
+  depth = 1
+
+  if l_operand != "0" and l_operand != "1":
+    right_count, right_depth = get_depth_info(l_operand)
+  if r_operand != "0" and r_operand != "1":
+    left_count, left_depth = get_depth_info(r_operand)
+
+  mult_count += max(right_count, left_count)
+  max_depth = depth + max(right_depth, left_depth)
+  return mult_count, max_depth
 
 def recursive_resolve(nested_ops):
   l_operand = nested_ops[0]
