@@ -1,10 +1,11 @@
 import random
 import math
+from fractions import Fraction
 
 def main():
   # public info 
-  q = 2**50
-  n = 30
+  q = 2**60
+  n = 10
 
   # private info
   s = randlist(q, n)
@@ -36,17 +37,14 @@ def main():
   print f3
 
   print "\nDecrypted:", decrypt(f3, t)
-  '''
 
-  print "\nTesting Modulus Dimension Reduction"
+  print "\nTesting Mod Reduction"
   _,f1 = encrypt(1, s, svars, q)
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  #p = 2**5
-  #k = 5
-  p = q
-  k = n
+  p = 2**60
+  k = 10
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -54,7 +52,20 @@ def main():
   print "\nMod Switched"
   print fmod
   print "\nDecrypted:", decrypt(fmod, z)
+  '''
 
+  print "\nTesting Modulus Dimension Reduction"
+  for i in range(40):
+    _,f1 = encrypt(1, s, svars, q)
+    p = 2**40
+    k = 10
+    z = randlist(p, k)
+    zvars = PolynomialRing(Integers(p), k, "z").gens()
+    si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+    fmod = modulusReduction(f1, svars, n, q, si_subs)
+    if(decrypt(fmod, z) != 1):
+      print "fail!"
+  print "success!"
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
@@ -83,9 +94,9 @@ def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = int(round(float(p)/float(q) * 2**tau * s[i]))
+      m = int(p * (2**tau) * s[i] / q)
       _,f = MR_encrypt(m, t, tvars, p)
-      si_subs[i].append(int(float(q)/float(p)) * f)
+      si_subs[i].append(int(Fraction(q, p)) * f)
   return si_subs
 
 def generate_error(q):
@@ -110,8 +121,7 @@ def encrypt(m, s, svars, q):
 
 def MR_encrypt(m, t, tvars, p):
   a = randlist(p, len(t))
-  #e = generate_error(p)
-  e = 0
+  e = generate_error(p)
   b = dot(a, t) + e + m
   return (a, b), b - dot(a, tvars)
 
