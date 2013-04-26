@@ -112,7 +112,7 @@ temp_op = []
 needs_parens = False
 
 #These global variables are used for the cryptographic functions
-k = 5
+k = 3#5
 n = k**2#k**4
 q = 2**(k**2)
 p = n**2 * math.log(q,2) * k**2
@@ -262,22 +262,19 @@ def recursive_resolve(nested_ops):
     if verbose == True:
       print "\n   Encrypted ", r_operand, " as: ", er_operand, "\n"
 
-  # TODO: allow operations on different depths
-  if dl != dr:
-    print "ERROR ERROR ERROR"
-
   # Perform the operations!
   if operator == "+":
     #timer = cputime(subprocesses=True)
     timer = time()
-    result = fhe_add(er_operand, el_operand, dl, dr)
+    result = fhe_add(el_operand, er_operand, dl, dr, subs)
     depth = max(dl, dr)
     #add_timer.append(float(cputime(subprocesses=True) - timer))
     add_timer.append(time() - timer)
+    print result, depth
   elif operator == "*":
     #timer = cputime(subprocesses=True)
     timer = time()
-    result = fhe_mult(er_operand, el_operand, dl, dr, subs)
+    result = fhe_mult(el_operand, er_operand, dl, dr, subs)
     depth = max(dl, dr) + 1
     #mult_timer.append(float(cputime(subprocesses=True) - timer))
     mult_timer.append(time() - timer)
