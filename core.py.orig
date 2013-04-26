@@ -2,36 +2,44 @@ import random
 import math
 from fractions import Fraction
 
-def test_mult(keys, subs):
-  d = 0
+def test_relinearize(s, svars, q, n):
+  si_subs, sisj_subs = generate_substitutions(s, s, svars, q, n)
   print "\n\n\nEncryption of 1:"
-  _,f1 = encrypt(1, keys[d], subs['varnames'][d], subs['p'][d])
+  _,f1 = encrypt(1, s, svars, q)
   print f1
   print "\nEncryption of 0:"
-  _,f2 = encrypt(0, keys[d], subs['varnames'][d], subs['p'][d])
+  _,f2 = encrypt(0, s, svars, q)
   print f2
   print "\nEncryption of 0 + 1:"
-  fadd = fhe_add(f1, f2)
+  fadd = f1+f2
   print fadd
-  print "\nDecrypted:", decrypt(fadd, keys[d])
+  print "\nDecrypted:", decrypt(fadd, s)
 
   print "\n\nEncryption of 0 * 1:"
-  f3 = fhe_mult(f1, f2, d, d, subs)
+  fmult = f1 * f2
+  print fmult
+  print "\nRelinearized:"
+  f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
+  f3 = relinearize(f3, svars, n, q, si_subs, sisj_subs)
   print f3
 
-  print "\nDecrypted:", decrypt(f3, keys[d+1])
+  print "\nDecrypted:", decrypt(f3, s)
 
 # adjusts q, n to the appropriate multiplication depth
 # this probably isn't quite what we want
 def adjust(q, n, depth):
   return (q>>depth), (n-depth)
 
-# returns keys (private info) and a list of substitutions 
-# for those keys
-def make_substitutions(q, n, L):
-  keys, varnames, linsubs, quadsubs, modsubs = [], [], [], [], []
-  olds, oldsvars = None, None
+def main():
+  # public info 
+  q = 2**10
+  n = 3
+  L = 2 #depth of circuit
 
+  # private info
+  keys, varnames, linsubs, quadsubs, modsubs = [], [], [], [], []
+
+  olds, oldsvars = None, None
   for i in range(L):
     print i
     p, k = adjust(q, n, i)
@@ -62,32 +70,69 @@ def make_substitutions(q, n, L):
   substitutions = {'varnames':varnames,'linsubs':linsubs,'quadsubs':quadsubs,'modsubs':modsubs}
   substitutions['p'] = [adjust(q, n, i)[0] for i in range(L)]
   substitutions['k'] = [adjust(q, n, i)[1] for i in range(L)]
-  return keys, substitutions
+  print substitutions
 
-
-def main():
-  # public info 
-  q = 2**10
-  n = 4
-  L = 3 #depth of circuit
-
-  keys, subs = make_substitutions(q, n, L)
-  test_mult(keys, subs)
+  test_relinearize(keys[0], varnames[0], q, n)
   return
 
+  s, svars = keygen(n, q, "s")
+  print "\nTesting Mod Reduction"
+  _,f1 = encrypt(1, s, svars, q)
+  print "\nEncryption of 1:"
+  print f1
+  print "\nModulus Switching"
+  p = q>>8
+  k = n-2
+
+  z = randlist(p, k)
+  zvars = PolynomialRing(Integers(p), k, "z").gens()
+  si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+  fmod = modulusReduction(f1, svars, n, q, si_subs)
+
+
+  s, svars = keygen(n, q, "s")
+  print "\nTesting Mod Reduction"
+  _,f1 = encrypt(1, s, svars, q)
+  print "\nEncryption of 1:"
+  print f1
+  print "\nModulus Switching"
+  p = q>>8
+  k = n-2
+
+  z = randlist(p, k)
+  zvars = PolynomialRing(Integers(p), k, "z").gens()
+  si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+  fmod = modulusReduction(f1, svars, n, q, si_subs)
+  print "\nMod Switched"
+  print fmod
+  print "\nDecrypted:", decrypt(fmod, z)
+  #return
   print "\nTesting Modulus Dimension Reduction"
   for i in range(40):
-    _,f1 = encrypt(1, keys[0], subs['varnames'][0], q)
-    fmod = modulusReduction(f1, subs['varnames'][0], n, q, subs['modsubs'][0])
-    fmod = modulusReduction(fmod, subs['varnames'][1], subs['k'][1], subs['p'][1], subs['modsubs'][1])
+    _,f1 = encrypt(1, s, svars, q)
+    z = randlist(p, k)
+    zvars = PolynomialRing(Integers(p), k, "z").gens()
+    si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+    fmod = modulusReduction(f1, svars, n, q, si_subs)
 
     #print decrypt(fmod,z)
-    if(decrypt(fmod, keys[2]) != 1):
+    if(decrypt(fmod, z) != 1):
       print "fail!"
       break
     if i == 39:
       print "success!"
 
+<<<<<<< HEAD
+=======
+  '''
+  print si_subs
+  print z
+  print f1
+  print s
+  print decrypt(f1, s)
+  print fmod
+  '''
+>>>>>>> 01dc4e023baffb5e865a6d69c0f04eb90af43f77
 
 #keyname must be a string, the same as the polynomial variable (aka, "s" or "t" or etc.)
 def keygen(n, q, keyname):
@@ -95,21 +140,16 @@ def keygen(n, q, keyname):
   pk_vars = sage.rings.polynomial.polynomial_ring_constructor.PolynomialRing(Integers(q), n, keyname).gens()
   return pk, pk_vars
 
-# multiplies, relinearizes, and does modulus-dimension reduction.
-# currently only works for ciphertexts of the same depth
+# TODO: needs access to si_subs, sisj_subs, level
+# so that we can do re-linearize and mod-switch
 def fhe_mult(f1, f2, d1, d2, subs):
-  d = 0
   if d1 != d2:
     print 'put them on the same level'
   else:
-    d = d1
-
-  fmult = f1*f2
-  fmult = relinearize(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['linsubs'][d], subs['quadsubs'][d])
-  # note below that the depth used for modsubs is the current depth, even though we are substituting TO
-  # depth d+1
-  fmult = modulusReduction(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['modsubs'][d])
-  return fmult
+    fmult = f1*f2
+    fmult = relinearize(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['linsubs'][d], subs['quadsubs'][d])
+    fmult = modulusReduction(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['modsubs'][d])
+    return fmult
 
 def fhe_add(f1, f2):
   return f1+f2

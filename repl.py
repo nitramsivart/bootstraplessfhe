@@ -177,18 +177,20 @@ def main():
       else:
         evaluate(input)
         if verbose == True:
-          print "\n   Operation Statistics  \n"
-          print "\n ------------------------\n"
-          print "\n   Addition time : ", sum(add_timer), "s\n"
-          print "\n      Mean       : ", mean(add_timer), "s\n"
-          print "\n      Stand Dev  : ", std(add_timer), "s\n"
-          print "\n      Minimum    : ", min(add_timer), "s\n"
-          print "\n      Maximum    : ", max(add_timer), "s\n"
-          print "\n   Multiply time : ", sum(mult_timer), "s\n"
-          print "\n      Mean       : ", mean(mult_timer), "s\n"
-          print "\n      Stand Dev  : ", std(mult_timer), "s\n"
-          print "\n      Minimum    : ", min(mult_timer), "s\n"
-          print "\n      Maximum    : ", max(mult_timer), "s\n"
+          if len(add_timer) > 0:
+            print "   Operation Statistics  "
+            print " ------------------------"
+            print "   Addition time : ", sum(add_timer), "s"
+            print "      Mean       : ", mean(add_timer), "s"
+            print "      Stand Dev  : ", std(add_timer, bias=True), "s"
+            print "      Minimum    : ", min(add_timer), "s"
+            print "      Maximum    : ", max(add_timer), "s"
+          if len(mult_timer) > 0:
+            print "   Multiply time : ", sum(mult_timer), "s"
+            print "      Mean       : ", mean(mult_timer), "s"
+            print "      Stand Dev  : ", std(mult_timer, bias=True), "s"
+            print "      Minimum    : ", min(mult_timer), "s"
+            print "      Maximum    : ", max(mult_timer), "s"
 
 def evaluate(func_str):
   global keys
@@ -198,15 +200,23 @@ def evaluate(func_str):
   ops = get_ops(func_str)
   # calulate number of subs needed here?
   for keyname in keynames:
+    #timer = cputime(subprocesses=True)
     timer = time()
     pk, pk_vars = keygen(n,q,keyname)
+    #key_gen_timer.append(float(cputime(subprocesses=True) - timer))
     key_gen_timer.append(time() - timer)
     keys.append(pk)
     key_vars.append(pk_vars)
   if verbose == True:
+<<<<<<< HEAD
     print "\n   Key generation averaged: ", mean(key_gen_timer), "s\n"
     print "\n   With standard deviation: ", std(key_gen_timer), "s\n"
     print "\n   Key generation completed in ", sum(key_gen_timer), "s\n"
+=======
+    print "   Key generation averaged: ", mean(key_gen_timer), "s"
+    print "   With standard deviation: ", std(key_gen_timer, bias=True), "s"
+    print "   Key generation completed in ", sum(key_gen_timer), "s"
+>>>>>>> 9bccd8463bb919d75d012e75919763adb10640d0
   encrypted_result = recursive_resolve(ops)
   if verbose == True:
     print "\n   Encrypted answer: ", encrypted_result, "\n"
@@ -263,14 +273,17 @@ def recursive_resolve(nested_ops):
 
   # Perform the operations!
   if operator == "+":
+    #timer = cputime(subprocesses=True)
     timer = time()
     result = fhe_add(er_operand, el_operand)
-    add_time.append( time() - timer )
+    #add_timer.append(float(cputime(subprocesses=True) - timer))
+    add_timer.append(time() - timer)
   elif operator == "*":
+    #timer = cputime(subprocesses=True)
     timer = time()
     result = fhe_mult(er_operand, el_operand)
-    mult_time.append( time() - timer )
-
+    #mult_timer.append(float(cputime(subprocesses=True) - timer))
+    mult_timer.append(time() - timer)
   return result
 
 def clear():
