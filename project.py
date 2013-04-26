@@ -4,7 +4,7 @@ from fractions import Fraction
 
 def main():
   # public info 
-  q = 2**51
+  q = 2**50
   n = 10
 
   # private info
@@ -61,7 +61,7 @@ def main():
   print f1
   print "\nModulus Switching"
   p = 2**50
-  k = 10
+  k = n-1
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -97,7 +97,7 @@ def generate_substitutions(s, t, tvars, q, n):
     for j in range(i+1):
       sisj_subs[i].append([])
       for tau in range(logq):
-        _,f = encrypt((2**tau*s[i]*s[j]), t, tvars, q)
+        _,f = encrypt((2**tau)*s[i]*s[j], t, tvars, q)
         sisj_subs[i][j].append(f)
   return si_subs, sisj_subs
 
@@ -129,14 +129,13 @@ def randlist(q, n):
 def encrypt(m, s, svars, q):
   a = randlist(q, len(s))
   e = generate_error(q)
-  #e = 0
   b = dot(a, s) + 2*e + m
   return (a, b), b - dot(a, svars)
 
 def MR_encrypt(m, t, tvars, p):
   a = randlist(p, len(t))
   e = generate_error(p)
-  b = dot(a, t) + e + m
+  b = dot(a, t) + 2*e + m
   return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
