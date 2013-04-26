@@ -243,9 +243,12 @@ def operator():
     return False
 
 def end():
+  global error_index
   if match(terminal_char):
     return True
   else:
+    if (current_index > error_index):
+      error_index = current_index
     return False
 
 # END RECURSIVE DESCENT PARSER FUNCTIONS #
