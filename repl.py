@@ -113,14 +113,13 @@ needs_parens = False
 
 #These global variables are used for the cryptographic functions
 k = 5
-n = k**4
+n = k**2#k**4
 q = 2**(k**2)
 p = n**2 * math.log(q,2) * k**2
 m = n * math.log(q,2)
+L = 5
 
-keynames = ["s"]
 keys = []
-key_vars = []
 subs = []
 
 #These global variables are params for the REPL
@@ -194,31 +193,22 @@ def main():
 
 def evaluate(func_str):
   global keys
-  global key_vars
-  keys = []
-  key_vars = []
+  global subs
   ops = get_ops(func_str)
-  chained_mult_count, tree_depth = get_depth_info(ops)
-  print "Mult count: ", chained_mult_count
-  print "Max depth: ", max_depth
-  # calulate number of subs needed here?
-  for keyname in keynames:
-    #timer = cputime(subprocesses=True)
-    timer = time()
-    pk, pk_vars = keygen(n,q,keyname)
-    #key_gen_timer.append(float(cputime(subprocesses=True) - timer))
-    key_gen_timer.append(time() - timer)
-    keys.append(pk)
-    key_vars.append(pk_vars)
+
+  max_sequential_mult_count, tree_depth = get_depth_info(ops)
+  L = max_sequential_mult_count
+  timer = time()
+  keys, subs = make_substitutions(q, n, L)
+  key_gen_timer.append(time() - timer)
+
   if verbose == True:
-    print "   KEY GNERATION TIME STATS:"
-    print "   Key generation averaged: ", mean(key_gen_timer), "s"
-    print "   With standard deviation: ", std(key_gen_timer, bias=True), "s"
+    print "   KEY GENRATION TIME STATS:"
     print "   Key generation completed in ", sum(key_gen_timer), "s"
-  encrypted_result = recursive_resolve(ops)
+  encrypted_result, depth = recursive_resolve(ops)
   if verbose == True:
     print "\n   Encrypted answer: ", encrypted_result, "\n"
-  print "\n   Decrypted answer: ", decrypt(encrypted_result, keys[0]), "\n"
+  print "\n   Decrypted answer: ", decrypt(encrypted_result, keys[depth]), "\n"
 
 def get_ops(func_str):
   func_str = strip_ws(func_str)
@@ -282,18 +272,21 @@ def recursive_resolve(nested_ops):
   l_operand = nested_ops[0]
   operator = nested_ops[1]
   r_operand = nested_ops[2]
+  dl, dr, depth = 0, 0, 0
 
   # Resolve the operands recursively
   if l_operand != "0" and l_operand != "1":
-    el_operand = recursive_resolve(l_operand)
+    el_operand, dl = recursive_resolve(l_operand)
   else:
-    _, el_operand = encrypt(int(l_operand), keys[0], key_vars[0], q)
+    _, el_operand = encrypt(int(l_operand), keys[0], subs['varnames'][0], q)
+    dl = 0
     if verbose == True:
       print "\n   Encrypted ", l_operand, " as: ", el_operand, "\n"
   if r_operand != "0" and r_operand != "1":
-    er_operand = recursive_resolve(r_operand)
+    er_operand, dr = recursive_resolve(r_operand)
   else:
-    _, er_operand = encrypt(int(r_operand), keys[0], key_vars[0], q)
+    _, er_operand = encrypt(int(r_operand), keys[0], subs['varnames'][0], q)
+    dr = 0
     if verbose == True:
       print "\n   Encrypted ", r_operand, " as: ", er_operand, "\n"
 
@@ -301,16 +294,19 @@ def recursive_resolve(nested_ops):
   if operator == "+":
     #timer = cputime(subprocesses=True)
     timer = time()
-    result = fhe_add(er_operand, el_operand)
+    result = fhe_add(el_operand, er_operand, dl, dr, subs)
+    depth = max(dl, dr)
     #add_timer.append(float(cputime(subprocesses=True) - timer))
     add_timer.append(time() - timer)
+    print result, depth
   elif operator == "*":
     #timer = cputime(subprocesses=True)
     timer = time()
-    result = fhe_mult(er_operand, el_operand)
+    result = fhe_mult(el_operand, er_operand, dl, dr, subs)
+    depth = max(dl, dr) + 1
     #mult_timer.append(float(cputime(subprocesses=True) - timer))
     mult_timer.append(time() - timer)
-  return result
+  return result, depth
 
 def clear():
   os_name = os.name

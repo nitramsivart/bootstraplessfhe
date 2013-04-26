@@ -4,22 +4,16 @@ from fractions import Fraction
 
 def test_mult(keys, subs):
   d = 0
-  print "\n\n\nEncryption of 1:"
   _,f1 = encrypt(1, keys[d], subs['varnames'][d], subs['p'][d])
-  print f1
-  print "\nEncryption of 0:"
   _,f2 = encrypt(0, keys[d], subs['varnames'][d], subs['p'][d])
-  print f2
-  print "\nEncryption of 0 + 1:"
-  fadd = fhe_add(f1, f2)
-  print fadd
+  fadd = fhe_add(f1, f2, 0, 0, subs)
   print "\nDecrypted:", decrypt(fadd, keys[d])
 
-  print "\n\nEncryption of 0 * 1:"
+  print "Encryption of 0 * 1:"
   f3 = fhe_mult(f1, f2, d, d, subs)
   print f3
 
-  print "\nDecrypted:", decrypt(f3, keys[d+1])
+  print "Decrypted:", decrypt(f3, keys[d+1])
 
 # adjusts q, n to the appropriate multiplication depth
 # this probably isn't quite what we want
@@ -98,11 +92,14 @@ def keygen(n, q, keyname):
 # multiplies, relinearizes, and does modulus-dimension reduction.
 # currently only works for ciphertexts of the same depth
 def fhe_mult(f1, f2, d1, d2, subs):
-  d = 0
-  if d1 != d2:
-    print 'put them on the same level'
-  else:
-    d = d1
+  while(d1<d2):
+    f1 = modulusReduction(f1, subs['varnames'][d1], subs['k'][d1], subs['p'][d1], subs['modsubs'][d1])
+    d1 += 1
+  while(d2<d1):
+    f1 = modulusReduction(f2, subs['varnames'][d2], subs['k'][d2], subs['p'][d2], subs['modsubs'][d2])
+    d2 += 1
+  
+  d = d1
 
   fmult = f1*f2
   fmult = relinearize(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['linsubs'][d], subs['quadsubs'][d])
@@ -111,7 +108,13 @@ def fhe_mult(f1, f2, d1, d2, subs):
   fmult = modulusReduction(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['modsubs'][d])
   return fmult
 
-def fhe_add(f1, f2):
+def fhe_add(f1, f2, d1, d2, subs):
+  while(d1<d2):
+    f1 = modulusReduction(f1, subs['varnames'][d1], subs['k'][d1], subs['p'][d1], subs['modsubs'][d1])
+    d1 += 1
+  while(d2<d1):
+    f1 = modulusReduction(f2, subs['varnames'][d2], subs['k'][d2], subs['p'][d2], subs['modsubs'][d2])
+    d2 += 1
   return f1+f2
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
