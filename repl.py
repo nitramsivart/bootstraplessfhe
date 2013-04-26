@@ -1,4 +1,5 @@
 import os
+#from core import keygen, encrypt, decrypt
 import core
 
 banner = """-----------------------------------------------------------------
@@ -85,6 +86,13 @@ help = """
    Whitespace doesn't matter.
    """
 
+param_msg = """
+   PARAMS:
+
+   [0] n                 {0}\t\tNumber of terms in polynomials. 
+   [1] q                 {1}\t\tPolynomial coefficients are chosen from Z mod q.
+"""
+
 prompt = "> "
 
 #These global variables are used by the recursive descent parser functions
@@ -114,6 +122,7 @@ subs = []
 verbose = True  
 
 def main():
+  global verbose
   clear()
   #run welcome 
   print banner
@@ -183,11 +192,13 @@ def get_ops(func_str):
     c = func_str[i]
     if (c == "("):
       new_list = []
-      indices.append(level_index+1)
+      level_index += 1
+      indices.append(level_index)
       level = top_level_list
       for i in range(len(indices)-1):
         level = level[indices[i]]
       level.append(new_list)
+      level_index = -1
     elif (c == ")"):
       if len(indices) > 0:
         level_index = indices.pop()
@@ -234,7 +245,67 @@ def clear():
     os.system('CLS')
 
 def param_menu():
-  print "params"
+  input = "foo"
+  while (input != ""):
+    valid_input = False
+    while (not valid_input):
+      print param_msg.format(n, q, True)
+      input = raw_input("   Select a number to change a parameter or hit <enter> to continue: ")
+      if input == "":
+        valid_input = True
+        print ""
+      elif is_int(input):
+        input = int(input)
+        if input == 0:
+          valid_input = True
+          set_n()
+          print ""
+        elif input == 1:
+          valid_input = True
+          set_q()
+          print ""
+        else:
+          raw_input("\n   Not one of the options. Try again!")
+      else:
+        raw_input("\n   Must be a non-negative integer or <enter>. Try again!")
+
+def set_n():
+  global n
+  valid_input = False
+  while (not valid_input):
+    input = raw_input("\n   Enter new value for n (or <enter> to escape): ")
+    if input == "":
+      valid_input = True
+      print "\n   No changes made.\n"
+    elif is_int(input):
+      input = int(input)
+      if input >= 1: 
+        valid_input = True
+        n = input
+        raw_input("\n   Successfully set n to be " + str(input) + ".")
+      else:
+        raw_input("\n   Must be an integer greater than zero.")
+    else:
+      raw_input("\n   Must be a positive integer or <enter>. Try again!")
+
+def set_q():
+  global q
+  valid_input = False
+  while (not valid_input):
+    input = raw_input("\n   Enter new value for q (or <enter> to escape): ")
+    if input == "":
+      valid_input = True
+      print "\n   No changes made.\n"
+    elif is_int(input):
+      input = int(input)
+      if input >= 2:
+        valid_input = True
+        q = input
+        raw_input("\n   Successfully set q to be " + str(input) + ".")
+      else:
+        raw_input("\n   Must be an integer greater than one.")
+    else:
+      raw_input("\n   Must be an integer greater than one or <enter>. Try again!")
 
 ### RECURSIVE DESCENT PARSER FUNCTIONS ###
 def parse_expression(input):
@@ -375,6 +446,15 @@ def strip_ws(s):
   s = s.expandtabs()
   s = s.replace(" ", "")
   return s
+
+def is_int(s):
+  is_int = True
+  digits = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+  for char in s:
+    if char not in digits:
+      is_int = False
+  return is_int
+
 
 if __name__ == '__main__':
   main()
