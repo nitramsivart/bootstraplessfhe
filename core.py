@@ -56,7 +56,7 @@ def main():
   print "\nDecrypted:", decrypt(fmod, z)
   '''
 
-  
+  s, svars = keygen(n, q, "s")
   print "\nTesting Mod Reduction"
   _,f1 = encrypt(1, s, svars, q)
   print "\nEncryption of 1:"
@@ -84,6 +84,18 @@ def main():
     if(decrypt(fmod, z) != 1):
       print "fail!"
   print "success!"
+
+#keyname must be a string, the same as the polynomial variable (aka, "s" or "t" or etc.)
+def keygen(n, q, keyname):
+  pk = randlist(q, n)
+  pk_vars = sage.rings.polynomial.polynomial_ring_constructor.PolynomialRing(Integers(q), n, keyname).gens()
+  return pk, pk_vars
+
+def fhe_mult(f1, f2):
+  return f1*f2
+
+def fhe_add(f1, f2):
+  return f1+f2
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
@@ -141,7 +153,7 @@ def MR_encrypt(m, t, tvars, p):
   logp = int(math.floor(math.log(p,2)))
   a = randlist(p, len(t))
   e = generate_error(logp)
-  b = dot(a, t) + 2*e + m
+  b = dot(a, t) + 2*e + int(m)
   return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
