@@ -1,15 +1,17 @@
 import random
 import math
+from fractions import Fraction
 
 def main():
   # public info 
-  q = 2**10
-  n = 20
+  q = 2**51
+  n = 10
 
   # private info
   s = randlist(q, n)
   svars = PolynomialRing(Integers(q), n, "s").gens()
 
+  '''
   t = randlist(q, n)
   tvars = PolynomialRing(Integers(q), n, "t").gens()
 
@@ -26,7 +28,6 @@ def main():
   fadd = f1+f2
   print fadd
   print "\nDecrypted:", decrypt(fadd, s)
-  raw_input()
 
   print "\n\nEncryption of 0 * 1:"
   fmult = f1 * f2
@@ -37,6 +38,48 @@ def main():
 
   print "\nDecrypted:", decrypt(f3, t)
 
+  print "\nTesting Mod Reduction"
+  _,f1 = encrypt(1, s, svars, q)
+  print "\nEncryption of 1:"
+  print f1
+  print "\nModulus Switching"
+  p = 2**60
+  k = 10
+  z = randlist(p, k)
+  zvars = PolynomialRing(Integers(p), k, "z").gens()
+  si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+  fmod = modulusReduction(f1, svars, n, q, si_subs)
+  print "\nMod Switched"
+  print fmod
+  print "\nDecrypted:", decrypt(fmod, z)
+  '''
+
+  
+  print "\nTesting Mod Reduction"
+  _,f1 = encrypt(1, s, svars, q)
+  print "\nEncryption of 1:"
+  print f1
+  print "\nModulus Switching"
+  p = 2**50
+  k = 10
+  z = randlist(p, k)
+  zvars = PolynomialRing(Integers(p), k, "z").gens()
+  si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+  fmod = modulusReduction(f1, svars, n, q, si_subs)
+  print "\nMod Switched"
+  print fmod
+  print "\nDecrypted:", decrypt(fmod, z)
+  #return
+  print "\nTesting Modulus Dimension Reduction"
+  for i in range(40):
+    _,f1 = encrypt(1, s, svars, q)
+    z = randlist(p, k)
+    zvars = PolynomialRing(Integers(p), k, "z").gens()
+    si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
+    fmod = modulusReduction(f1, svars, n, q, si_subs)
+    if(decrypt(fmod, z) != 1):
+      print "fail!"
+  print "success!"
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
 # s is old key, t is new key
@@ -58,16 +101,16 @@ def generate_substitutions(s, t, tvars, q, n):
         sisj_subs[i][j].append(f)
   return si_subs, sisj_subs
 
-def generate_MR_subsitutions(s, t, tvars, q, p, n, k)
+def generate_MR_substitutions(s, t, tvars, q, p, n, k):
   logq = int(math.floor(math.log(q,2)))
   si_subs = []
-  # encrypt p/q 2**tau s[i]
+  # encrypt 2**tau s[i]
   for i in range(len(s)):
     si_subs.append([])
     for tau in range(logq):
-      m = math.round(p/q * 2**tau * s[i])
+      m = p * (2**tau) * s[i] / q
       _,f = MR_encrypt(m, t, tvars, p)
-      si_subs[i].append(f)
+      si_subs[i].append(int(Fraction(q, p)) * f)
   return si_subs
 
 def generate_error(q):
@@ -86,13 +129,14 @@ def randlist(q, n):
 def encrypt(m, s, svars, q):
   a = randlist(q, len(s))
   e = generate_error(q)
+  #e = 0
   b = dot(a, s) + 2*e + m
   return (a, b), b - dot(a, svars)
 
 def MR_encrypt(m, t, tvars, p):
-  a = randlist(p, len(tvars))
+  a = randlist(p, len(t))
   e = generate_error(p)
-  b = dot(a,t) + e + m
+  b = dot(a, t) + e + m
   return (a, b), b - dot(a, tvars)
 
 # decrypt the ciphertext c
@@ -110,7 +154,7 @@ def relinearize(f, svars, n, q, si_subs, sisj_subs):
     for j in range(i+1):
       hij = f.coefficient(svars[i]*svars[j])([0]*n)
       for tau in range(logq):
-        hbit = ((hij >> tau) % 2).lift()
+        hbit = (int(hij) >> tau) % 2
         g += hbit*sisj_subs[i][j][tau]
   return g
 
@@ -122,12 +166,18 @@ def relinearize(f, svars, n, q, si_subs, sisj_subs):
 # to page 7 paragraph 1
 def modulusReduction(f, svars, n, q, si_subs):
   logq = int(math.floor(math.log(q,2)))
-  g = f([0 for i in range(n)])
+  g = f([0 for i in range(n)]).lift()
   for i in range(n):
-    hi = f.coefficient(svars[i])
+    hi = f.coefficient(svars[i])([0]*n)
     for tau in range(logq):
-      hbit = ((hi >> tau) % 2).lift()
-      g += hi*si_subs[i][tau]
+      hbit = (int(hi) >> tau) % 2
+      g += hbit*si_subs[i][tau]
   return g
+
+def bootstrap(f, svars, n, q, ti_encrypt):
+  g= modulusReduction(f, svars, n, q, si_subs)
+  m = (dot(g, ti_encrypt) % p).lift() % 2
+  h = modulusReduction(f, tvars, k, p, ti_subs)
+  return h
 
 main()
