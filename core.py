@@ -27,7 +27,6 @@ def make_substitutions(q, n, L):
   olds, oldsvars = None, None
 
   for i in range(L):
-    print i
     p, k = adjust(q, n, i)
     s, svars = keygen(k, p, chr(ord('a')+i))
 

@@ -197,7 +197,8 @@ def evaluate(func_str):
   ops = get_ops(func_str)
 
   max_sequential_mult_count, tree_depth = get_depth_info(ops)
-  L = max_sequential_mult_count
+  L = max_sequential_mult_count + 1
+  print L
   timer = time()
   keys, subs = make_substitutions(q, n, L)
   key_gen_timer.append(time() - timer)
