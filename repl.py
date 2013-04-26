@@ -27,6 +27,8 @@ or
                         verbosity off
 
 into the shell. Some other useful commands:
+   
+                   params          view and change parameters
 
                    clear           clear the screen
 
@@ -64,6 +66,8 @@ help = """
    verbosity on    see encryptions of data/results and the keys
 
    verbosity off   turn off that 
+
+   params          view and change parameters
 
    clear           clear the screen
 
@@ -125,6 +129,8 @@ def main():
       verbose = True
     elif (input == "verbosity off"):
       verbose = False
+    elif (input == "params"):
+      param_menu()
     else:
       #equation parsing
       is_valid, tree = parse_expression(input)
@@ -140,7 +146,9 @@ def clear():
   elif os_name == "nt" or os_name == "dos" or os_name == "ce":
     os.system('CLS')
 
-# RECURSIVE DESCENT PARSER FUNCTIONS #
+def param_menu():
+
+### RECURSIVE DESCENT PARSER FUNCTIONS ###
 
 def parse_expression(input):
   global func_to_parse
@@ -251,11 +259,18 @@ def end():
       error_index = current_index
     return False
 
-# END RECURSIVE DESCENT PARSER FUNCTIONS #
+#### END RECURSIVE DESCENT PARSER FUNCTIONS ###
 
 # given an index for a string with no spaces, return the index for the same
 # character in the same string but with arbitrary spaces inserted. (AKA the
 # 'original string')
+#
+# Example: given index = 3:
+# (A*B)
+#    ^
+# and the original string ( A * B ), return index =  6:
+# ( A * B )
+#       ^
 def expanded_index(original_str, index_sans_spaces):
   index_with_spaces = 0
   char_count = 0
@@ -266,6 +281,5 @@ def expanded_index(original_str, index_sans_spaces):
       char_count += 1
   return index_with_spaces
 
-
-
-main()
+if __name__ == '__main__':
+  main()

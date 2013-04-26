@@ -185,4 +185,5 @@ def bootstrap(f, svars, n, q, ti_encrypt):
   h = modulusReduction(f, tvars, k, p, ti_subs)
   return h
 
-main()
+if __name__ == '__main__':
+  main()
