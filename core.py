@@ -6,7 +6,7 @@ def test_mult(keys, subs):
   d = 0
   _,f1 = encrypt(1, keys[d], subs['varnames'][d], subs['p'][d])
   _,f2 = encrypt(0, keys[d], subs['varnames'][d], subs['p'][d])
-  fadd = fhe_add(f1, f2)
+  fadd = fhe_add(f1, f2, 0, 0)
   print "\nDecrypted:", decrypt(fadd, keys[d])
 
   print "Encryption of 0 * 1:"
@@ -105,7 +105,7 @@ def fhe_mult(f1, f2, d1, d2, subs):
   fmult = modulusReduction(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['modsubs'][d])
   return fmult
 
-def fhe_add(f1, f2):
+def fhe_add(f1, f2, d1, d2):
   return f1+f2
 
 # take in a key vector, generate encryptions for all s[i] and s[i]s[j]
