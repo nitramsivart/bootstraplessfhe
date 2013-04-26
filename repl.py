@@ -187,9 +187,9 @@ def evaluate(func_str):
   ops = get_ops(func_str)
   # calulate number of subs needed here?
   for keyname in keynames:
-    timer = time()
+    timer = cputime(subprocesses=True)
     pk, pk_vars = keygen(n,q,keyname)
-    key_gen_timer.append(time() - timer)
+    key_gen_timer.append(cputime(subprocesses=True) - timer)
     keys.append(pk)
     key_vars.append(pk_vars)
   if verbose == True:
@@ -250,13 +250,13 @@ def recursive_resolve(nested_ops):
 
   # Perform the operations!
   if operator == "+":
-    timer = time()
+    timer = cputime(subprocesses=True)
     result = fhe_add(er_operand, el_operand)
-    add_time.append( time() - timer )
+    add_time.append( cputimetime(subprocesses=True) - timer )
   elif operator == "*":
-    timer = time()
+    timer = cputime(subprocesses=True)
     result = fhe_mult(er_operand, el_operand)
-    mult_time.append( time() - timer )
+    mult_time.append( cputime(subprocesses=True) - timer )
 
   return result
 
