@@ -1,5 +1,6 @@
 import os
 import core
+from time import time
 
 banner = """-----------------------------------------------------------------
 |            LWE-BASED FULLY HOMOMORPHIC ENCRYPTION             |
@@ -103,8 +104,12 @@ temp_op = []
 needs_parens = False
 
 #These global variables are used for the cryptographic functions
-n = 5
-q = 2**10
+k = 50
+n = k**4
+q = 2**(k**2)
+p = n**2 * math.log(q,2) * k**2
+m = n * math.log(q,2)
+
 keynames = ["s"]
 keys = []
 key_vars = []
@@ -162,10 +167,17 @@ def evaluate(func_str):
   global key_vars
   ops = get_ops(func_str)
   # calulate number of subs needed here?
+  key_gen_times = []
   for keyname in keynames:
+    key_gen_start = time()
     pk, pk_vars = keygen(n,q,keyname)
+    key_gen_times.append(time() - key_gen_start)
     keys.append(pk)
     key_vars.append(pk_vars)
+  if verbose == True:
+    print "\n   Key generation averaged: ", mean(key_gen_times), "ms\n"
+    print "\n   With standard deviation: ", std(key_gen_times), "ms\n"
+    print "\n   Key generation completed in ", sum(key_gen_times), "ms\n"
   encrypted_result = recursive_resolve(ops)
   if verbose == True:
     print "\n   Encrypted answer: ", encrypted_result, "\n"

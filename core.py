@@ -90,6 +90,7 @@ def main():
   print "\nModulus Switching"
   p = q>>8
   k = n-2
+
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
@@ -186,7 +187,7 @@ def encrypt(m, s, svars, q):
   logq = int(math.floor(math.log(q,2)))
   a = randlist(q, len(s))
   e = generate_error(logq)
-  b = dot(a, s) + 2*e + m
+  b = dot(a, s) + 2*e + int(round(m))
   return (a, b), b - dot(a, svars)
 
 # did some weird stuff to make sure we don't round too soon
