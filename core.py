@@ -20,67 +20,75 @@ def test_relinearize(s, svars, q, n):
   print fmult
   print "\nRelinearized:"
   f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
+  f3 = relinearize(f3, svars, n, q, si_subs, sisj_subs)
   print f3
 
   print "\nDecrypted:", decrypt(f3, s)
 
+# adjusts q, n to the appropriate multiplication depth
+# this probably isn't quite what we want
+def adjust(q, n, depth):
+  return (q>>depth), (n-depth)
 
 def main():
   # public info 
-  q = 2**50
-  n = 10
+  q = 2**10
+  n = 3
+  L = 2 #depth of circuit
 
   # private info
-  s = randlist(q, n)
-  svars = PolynomialRing(Integers(q), n, "s").gens()
+  keys, varnames, linsubs, quadsubs, modsubs = [], [], [], [], []
 
-  #testing
-  test_relinearize(s, svars, q, n)
+  olds, oldsvars = None, None
+  for i in range(L):
+    print i
+    p, k = adjust(q, n, i)
+    s, svars = keygen(k, p, chr(ord('a')+i))
 
+    # re-linearization substitutions, using circular security
+    si_subs, sisj_subs = generate_substitutions(s, s, svars, p, k)
+
+    keys.append(s)
+    varnames.append(svars)
+    linsubs.append(si_subs)
+    quadsubs.append(sisj_subs)
+
+    # we don't need to generate any substitutions
+    if i == 0:
+      olds, oldsvars = s, svars
+      continue
+
+    oldp, oldk = adjust(q, n, i-1)
+
+    # mod reduction substitutions
+    mr_subs = generate_MR_substitutions(olds, s, svars, oldp, p, oldk, k)
+
+    modsubs.append(mr_subs)
+    olds, oldsvars = s, svars
+
+  # this is public info!
+  substitutions = {'varnames':varnames,'linsubs':linsubs,'quadsubs':quadsubs,'modsubs':modsubs}
+  substitutions['p'] = [adjust(q, n, i)[0] for i in range(L)]
+  substitutions['k'] = [adjust(q, n, i)[1] for i in range(L)]
+  print substitutions
+
+  test_relinearize(keys[0], varnames[0], q, n)
   return
 
-  '''
-  t = randlist(q, n)
-  tvars = PolynomialRing(Integers(q), n, "t").gens()
-
-  si_subs, sisj_subs = generate_substitutions(s, t, tvars, q, n)
-
-  # main logic
-  print "\n\n\nEncryption of 1:"
-  _,f1 = encrypt(1, s, svars, q)
-  print f1
-  print "\nEncryption of 0:"
-  _,f2 = encrypt(0, s, svars, q)
-  print f2
-  print "\nEncryption of 0 + 1:"
-  fadd = f1+f2
-  print fadd
-  print "\nDecrypted:", decrypt(fadd, s)
-
-  print "\n\nEncryption of 0 * 1:"
-  fmult = f1 * f2
-  print fmult
-  print "\nRelinearized:"
-  f3 = relinearize(f1*f2, svars, n, q, si_subs, sisj_subs)
-  print f3
-
-  print "\nDecrypted:", decrypt(f3, t)
-
+  s, svars = keygen(n, q, "s")
   print "\nTesting Mod Reduction"
   _,f1 = encrypt(1, s, svars, q)
   print "\nEncryption of 1:"
   print f1
   print "\nModulus Switching"
-  p = 2**60
-  k = 10
+  p = q>>8
+  k = n-2
+
   z = randlist(p, k)
   zvars = PolynomialRing(Integers(p), k, "z").gens()
   si_subs = generate_MR_substitutions(s, z, zvars, q, p, n, k)
   fmod = modulusReduction(f1, svars, n, q, si_subs)
-  print "\nMod Switched"
-  print fmod
-  print "\nDecrypted:", decrypt(fmod, z)
-  '''
+
 
   s, svars = keygen(n, q, "s")
   print "\nTesting Mod Reduction"
@@ -114,15 +122,6 @@ def main():
     if i == 39:
       print "success!"
 
-  '''
-  print si_subs
-  print z
-  print f1
-  print s
-  print decrypt(f1, s)
-  print fmod
-  '''
-
 
 #keyname must be a string, the same as the polynomial variable (aka, "s" or "t" or etc.)
 def keygen(n, q, keyname):
@@ -132,8 +131,14 @@ def keygen(n, q, keyname):
 
 # TODO: needs access to si_subs, sisj_subs, level
 # so that we can do re-linearize and mod-switch
-def fhe_mult(f1, f2):
-  return f1*f2
+def fhe_mult(f1, f2, d1, d2, subs):
+  if d1 != d2:
+    print 'put them on the same level'
+  else:
+    fmult = f1*f2
+    fmult = relinearize(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['linsubs'][d], subs['quadsubs'][d])
+    fmult = modulusReduction(fmult, subs['varnames'][d], subs['k'][d], subs['p'][d], subs['modsubs'][d])
+    return fmult
 
 def fhe_add(f1, f2):
   return f1+f2
@@ -232,12 +237,6 @@ def modulusReduction(f, svars, n, q, si_subs):
       hbit = (int(hi) >> tau) % 2
       g += hbit*si_subs[i][tau]
   return g
-
-def bootstrap(f, svars, n, q, ti_encrypt):
-  g= modulusReduction(f, svars, n, q, si_subs)
-  m = (dot(g, ti_encrypt) % p).lift() % 2
-  h = modulusReduction(f, tvars, k, p, ti_subs)
-  return h
 
 if __name__ == '__main__':
   main()
