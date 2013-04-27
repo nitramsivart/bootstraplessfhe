@@ -64,9 +64,13 @@ Unfortunately, in their current state, FHE schemes incur too much overhead to be
 
 Since the first FHE scheme was proposed in 2009, combatting the performance costs has been the primary focus of the FHE research community. They propose many optimizations, but mostly asymptotic results. Since they are theory folks and optimizations are coming out so rapidly, there have been few implementations. However, this means that it is hard to gauge whether or not optimizations that are asymptotically faster represent actual performance improvements. Without this feedback, it's hard to tell which branch of FHE to pursue.
 
-Recently a scheme was proposed in \cite{} that involves a new branch of FHE based on LWE. The authors state explicity that while their solutions are asymptotically faster, they don't know whether or not they're actually faster, than AGCD schemes(?).
+Recently a scheme was proposed by Brakerski, Gentry, and Vaikuntanathan in \cite{SansBootstrapping} that involves a new branch of FHE based on LWE that is able to operate without bootstrapping. The authors state explicity that while their solutions are asymptotically faster, they don't know whether or not they're actually faster in practice than earlier schemes:
 
-We answer this call by implementing it and comparing it to an optimized AGCD scheme by Coron, Naccache, and Tibouchi. This comparison adds to the sparse set of real-world FHE performance data points. We are also the first to release LWE FHE code to the public. This can be used for additional paramter exploration, cracking attempts, or a hands-on introduction to an FHE system.
+\begin{quotation}
+``Performance-wise, this scheme trounces previous (bootstrapping-based) FHE schemes (at least asymptotically; the concrete performance remains to be seen)."
+\end{quotation}
+
+We answer this call by implementing it and comparing it to a bootstrapping AGCD-based scheme by Coron, Naccache, and Tibouchi. This comparison adds to the sparse set of real-world FHE performance data points. We are also the first to release LWE FHE code to the public. This can be used for additional paramter exploration, cracking attempts, or a hands-on introduction to an FHE system.
 
 
 %DONE
@@ -120,9 +124,9 @@ Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE sche
 
 %INCOMPLETE
 \subsection{Learning With Errors Schemes}
-In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Conveniently did not require SSSP, also eventually produced optimizations that allowed for elimination of bootstrapping, though it could still be implemented as an additional optimization. Ciphertext and key sizes also happened to be smaller than many (all?) AGCD schemes.
+In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Conveniently did not require SSSP, also eventually produced optimizations that allowed for elimination of bootstrapping~\cite{SansBootstrapping}, though it could still be implemented as an additional optimization. Ciphertext and key sizes also happened to be smaller than many (all?) AGCD schemes.
 
-DESCRIBE THE BASICS OF OUR LWE SCHEME IN DETAIL.
+DESCRIBE THE BASICS OF OUR LWE SCHEME (FROM \cite{SansBootstrapping}) IN DETAIL.
 
 
 %INCOMPLETE

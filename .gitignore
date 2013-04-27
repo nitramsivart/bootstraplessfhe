@@ -2,7 +2,6 @@
 *.swp
 *.aux
 *.bbl
-*.bib
 *.blg
 *.dvi
 *.ent
