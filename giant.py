@@ -74,7 +74,7 @@ def fhe_mult(f1, f2, d1, d2, subs):
     f1 = modulusReduction(f1, subs['varnames'][d1], subs['k'][d1], subs['p'][d1], subs['modsubs'][d1])
     d1 += 1
   while(d2<d1):
-    f1 = modulusReduction(f2, subs['varnames'][d2], subs['k'][d2], subs['p'][d2], subs['modsubs'][d2])
+    f2 = modulusReduction(f2, subs['varnames'][d2], subs['k'][d2], subs['p'][d2], subs['modsubs'][d2])
     d2 += 1
   
   d = d1
@@ -91,7 +91,7 @@ def fhe_add(f1, f2, d1, d2, subs):
     f1 = modulusReduction(f1, subs['varnames'][d1], subs['k'][d1], subs['p'][d1], subs['modsubs'][d1])
     d1 += 1
   while(d2<d1):
-    f1 = modulusReduction(f2, subs['varnames'][d2], subs['k'][d2], subs['p'][d2], subs['modsubs'][d2])
+    f2 = modulusReduction(f2, subs['varnames'][d2], subs['k'][d2], subs['p'][d2], subs['modsubs'][d2])
     d2 += 1
   return f1+f2
 
@@ -718,6 +718,8 @@ def is_int(s):
 def main():
   models = ["toy", "small", "medium", "large"]
   lam = [42, 52, 62, 72]
+  global verbose
+  verbose = False
 
   print("Comparison to DGHV System by Coron")
   print("We will compare on similar security parameters for equivelance")
@@ -760,7 +762,7 @@ def main():
     print (string," evaluated in ", time() - timer) 
 
     timer = time()
-    string = "(((1*1)+(0*1))*((1*1)+(0*1)))*1"
+    string = "((((1*1)+(0*1))*((1*1)+(0*1)))*1)"
     evaluate(string)
     print(string," evaluated in ", time() - timer)
   

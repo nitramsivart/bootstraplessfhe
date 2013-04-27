@@ -1,0 +1,10 @@
+PWD /Users/tbm1/Documents/588/bootstraplessfhe/paper
+INPUT /usr/local/texlive/2012/texmf.cnf
+INPUT /usr/local/texlive/2012/texmf/web2c/texmf.cnf
+INPUT /usr/local/texlive/2012/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT final_paper.tex
+OUTPUT final_paper.log
+INPUT /usr/local/texlive/2012/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2012/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2012/texmf-dist/tex/latex/base/size10.clo
+INPUT /usr/local/texlive/2012/texmf-dist/tex/latex/base/size10.clo
