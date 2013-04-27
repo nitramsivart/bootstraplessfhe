@@ -195,15 +195,6 @@ int main() {
 \section{Results}
 Here's a typical figure reference. The figure is centered at the top of the column. It's scaled. It's explicitly placed. You'll have to tweak the numbers to get what you want.\\
 
-% you can also use the wonderful epsfig package...
-\begin{figure}[t]
-\begin{center}
-\begin{picture}(300,150)(0,200)
-\put(-15,-30){\special{psfile = fig1.ps hscale = 50 vscale = 50}}
-\end{picture}\\
-\end{center}
-\caption{Description of what information is being displayed. Results/trends of note. What those results/trends mean (impact).}
-\end{figure}
 
 This text came after the figure, so we'll casually refer to Figure 1 as we go on our merry way.
 
@@ -238,5 +229,22 @@ If you have questions, we will do our best to answer them.
 %INCOMPLETE
 {\footnotesize \bibliographystyle{acm}
 \bibliography{final_paper}
+
+% this is at the end so it can be one column, on its own page
+\begin{figure}[t]
+\begin{center}
+\onecolumn
+\begin{tabular}{|c|c|c|c|c|} \hline
+Example size & Security Parameter & Their time & Our time & ? \\ \hline
+Toy & 42 & & &  \\ \hline
+Small & 52 & & &  \\ \hline
+Medium & 62 & & &  \\ \hline
+Large & 72 & & &  \\ \hline
+\hline
+\end{tabular}
+
+\end{center}
+\caption{A comparison of performance for the Coron et al. implementation and our LWE-based implementation}
+\end{figure}
 
 \end{document}
