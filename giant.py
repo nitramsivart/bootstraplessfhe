@@ -720,6 +720,11 @@ def main():
   lam = [42, 52, 62, 72]
   global verbose
   verbose = False
+  global k
+  global n
+  global q
+  global L
+  global p
 
   print("Comparison to DGHV System by Coron")
   print("We will compare on similar security parameters for equivelance")
