@@ -1,0 +1,137 @@
+% TEMPLATE for Usenix papers, specifically to meet requirements of
+%  USENIX '05
+% originally a template for producing IEEE-format articles using LaTeX.
+%   written by Matthew Ward, CS Department, Worcester Polytechnic Institute.
+% adapted by David Beazley for his excellent SWIG paper in Proceedings,
+%   Tcl 96
+% turned into a smartass generic template by De Clarke, with thanks to
+%   both the above pioneers
+% use at your own risk.  Complaints to /dev/null.
+% make it two column with no page numbering, default is 10 point
+
+% Munged by Fred Douglis <douglis@research.att.com> 10/97 to separate
+% the .sty file from the LaTeX source template, so that people can
+% more easily include the .sty file into an existing document.  Also
+% changed to more closely follow the style guidelines as represented
+% by the Word sample file. 
+
+% Note that since 2010, USENIX does not require endnotes. If you want
+% foot of page notes, don't include the endnotes package in the 
+% usepackage command, below.
+
+% This version uses the latex2e styles, not the very ancient 2.09 stuff.
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix,epsfig,endnotes}
+\begin{document}
+
+%don't want date printed
+\date{}
+
+%make title bold and 14 pt font (Latex default is non-bold, 16 pt)
+\title{\Large \bf Implementing and Benchmarking a LWE-based Fully Homomorphic Encryption Scheme}
+
+%for single author (just remove % characters)
+\author{
+{\rm Meghan L.\ Clark}\\
+University of Michigan
+\and
+{\rm Alex L.\ James}\\
+University of Michigan
+\and
+{\rm Travis B.\ Martin}\\
+University of Michigan
+} % end author
+
+\maketitle
+
+% Use the following at camera-ready time to suppress page numbers.
+% Comment it out when you first submit the paper for review.
+%\thispagestyle{empty}
+
+
+\subsection*{Abstract}
+Fully homomorphic encryption (FHE) provides a way for third parties to compute arbitrary functions on encrypted data. This has the potential to revolutionize cloud computing services. Unfortunately, since their emergence in 2009, FHE schemes have become notorious for incurring enormous costs in time and space. Over the last four years optimizations have been proposed with impressive rapidity. However, the degree of progress is unknown, as these improvements are usually only asymptotically beneficial. The newness of the field and relative opacity of the literature has resulted in few implementations and evaluations of actual performance. To fill this gap, we implement a recent FHE scheme based on the Learning with Errors (LWE) hardness problem. We compare the performance of our system with an implementation of an earlier FHE scheme based on the Approximate GCD (AGC) hardness problem. We find that our system does [BETTER/WORSE] than the AGCD scheme. We also release our system to the public to promote additional experimentation and to increase the accessibility of this new cryptographic construct.
+
+\section{Introduction}
+
+Why you should care about FHE, why there are no implementations, why implementations would be awesome, why our contribution is therefore awesome.
+
+\section{Background}
+
+A brief history and explanation of FHE. Enough so that the reader knows what the eff we're talking about.
+
+Now we're going to cite somebody. Watch for the cite tag. Here it comes~\cite{GentryThesis09}. The tilde character (\~{}) in the source means a non-breaking space. This way, your reference will always be attached to the word that preceded it, instead of going to the next line.
+
+\section{Related Work}
+
+Specifically, the implementation papers - the AES paper, Implementing Gentry (maybe? They actually wrote code, right?), the ``Practical" paper, the CNT/Scarab projects, whichever LWE was implemented but not released.
+
+This section is for highlighting what makes our work different from previous work.
+
+\section{Methodology}
+
+This is about the experimental design. Start off with a super high-level description of our approach. A.k.a, given an existing Python SAGE implementation for AGCD, write our own LWE implementation also in Python SAGE, and then benchmark each on a variety of parameters described here. 
+
+IMPORTANT: This is where we make the case that our benchmarking comparisons are fair. This whole section is not just describing but also \emph{justifying} our experimental design choices. Namely, the optimizations we chose, the parameters we chose, etc., and why those choices make it fair. 
+
+This is the most important section of the paper. This is where the reader can tell whether we did good science or bad science.
+
+\section{Implementation}
+
+The nitty-gritty about the implementation. This can just be a straight-up description about how our code works.
+
+If you want to include code snippets, here's some example \LaTeX for that:
+
+{\tt \small
+\begin{verbatim}
+int main() {
+    int result = 1
+    if (result != 2) {
+        printf("You get here every time, man.\n");
+    }
+}
+\end{verbatim}
+}
+
+\section{Results}
+
+Here's a typical figure reference. The figure is centered at the top of the column. It's scaled. It's explicitly placed. You'll have to tweak the numbers to get what you want.\\
+
+% you can also use the wonderful epsfig package...
+\begin{figure}[t]
+\begin{center}
+\begin{picture}(300,150)(0,200)
+\put(-15,-30){\special{psfile = fig1.ps hscale = 50 vscale = 50}}
+\end{picture}\\
+\end{center}
+\caption{Description of what information is being displayed. Results/trends of note. What those results/trends mean (impact).}
+\end{figure}
+
+This text came after the figure, so we'll casually refer to Figure 1 as we go on our merry way.
+
+\section{Discussion}
+
+Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
+
+\section{Future Work}
+
+Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
+
+\section{Conclusion}
+
+A summary - basically the abstract again, but more detailed about the results. State problem, state why problem is bad, state the solution we tried, state whether or not it worked and to what degree. Close with a line about the future of FHE.
+
+\section{Availability}
+
+We feel very strongly that releasing our implementation to the public for examination and experimentation is one of the major contributions of this work. Our code and directions for running it can be found at:
+
+\begin{center}
+{\tt https://github.com/tbmbob/bootstraplessfhe}\\
+\end{center}
+
+If you have questions, we will do our best to answer them.
+
+{\footnotesize \bibliographystyle{acm}
+\bibliography{final_paper}
+
+\end{document}

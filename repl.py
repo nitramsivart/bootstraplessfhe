@@ -170,7 +170,7 @@ def main():
       param_menu()
     else:
       #equation parsing
-      is_valid, tree = parse_expression(input)
+      is_valid = parse_expression(input)
       if (is_valid == False):
         print "\n   Unexpected syntax: " + input + "\n" + ((22 + expanded_index(input, error_index)) * " ") + "^\n   Type 'help' for more info\n"
       else:
@@ -396,7 +396,7 @@ def parse_expression(input):
   is_valid = expression()
   if (is_valid == False and error_index == -1):
     error_index = len(func_to_parse) - 2
-  return is_valid, []
+  return is_valid
 
 def next():
   global token
