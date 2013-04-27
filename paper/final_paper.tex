@@ -142,9 +142,19 @@ Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE sche
 
 %INCOMPLETE
 \subsection{Learning With Errors Schemes}
-In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Using a similar form to the AGCD-based scheme, these schemes viewed their ciphertext as randomly chosen vectors dotted and added with a secret key. Conveniently did not require SSSP, also eventually produced optimizations that allowed for elimination of bootstrapping~\cite{SansBootstrapping}, though it could still be implemented as an additional optimization. Ciphertext and key sizes also happened to be smaller than many (all?) AGCD schemes.
+In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Using a similar form to the AGCD-based scheme, the Learning with Errors Schemes\cite{SansBootstrapping} schemes viewed their ciphertext as randomly chosen vectors dotted and added with a secret key.
+$$E_s(m) = (a, <a,s> + 2e + m)$$
+$$D_c(x) = (<a,s> + 2e + m) - <a,x>$$
+In this scheme, addition of two ciphertexts is done in the same way that addition would naively be done, however, when looking at the multiplication it is helpful to look at the invarient linear function $\phi(x) \equiv b - <a,x>$ and multiply these instead. When this is done it takes the key from dimension $n$ to dimension $n^2$ and so to maintain managable key sizes for even small circuit depth a relinearization step is necissary. For this to happen, it is necissary for the client to post encryptions of pairwise multiples of their secret key's entries. Luckily, the rings we are dealing with are communitive and so it is only necissary to post $E(s[i]s[j])$ for $0 \leq i \leq j \leq n$ where $s[0] \doteq 1$. This allows transformation from a keyspace in $s$ of degree $n^2$ to a second keyspace for a secret key $t$ of size $n$. If we assume circular security, then we can simply publish this transformation rather than a large chain of transformations and $s$ will then re-encrypt to itself.
 
-DESCRIBE THE BASICS OF OUR LWE SCHEME (FROM \cite{SansBootstrapping}) IN DETAIL.
+However, this does not negate the impact of noise, as the chain progresses, the noise will grow. To handle the noise it is helpful to observe the ratio between the noise $B$ and the modulus $q$. When $\frac{B}{q} \approx 1$ the noise overwhelms the message and so we prefer to have a small noise ratio. This is done with a well known property of modulus, if $ab \equiv ac \bmod ad$ then $b \equiv c \bmod d$. Just like in much of this work, we do not need exact precision as we are already dealing with an error term, instead we can approximate this effect even if
+the terms do not divide as nicely. By doing this, we reduce the absolute value of the noise from $B^2$ after a multiplication back down to $B$. This allows us to evaluate $L$ depth circuits with modulus $q \geq B^L+1$ rather than having to require a modulus $q \geq B^{2^L}$. This method is called modulus reduction.
+
+To lower the complexity of the decryption circuit a sufficient amount it is also necissary to lower the dimension of the ciphertext which we are dealing with. This is done with dimension reduction, one should note from the relinearization stage that it isn't necissary to have $s$ and $t$ be of the same dimension. Using this fact, it is possible to convert the ciphertext from using a private key $s$ of dimension $n$ to a private key $t$ of dimension $k$. After these steps have been performed our ciphertext will have reduced noise, and reduced complexity which allows for bootstrapping as an optimization.
+
+The last statement might seem out of place to the reader, as bootstrapping was just described as being very inefficient. However, it can be an optimization if the depth of the circuit is large enough that evaluation on the high-dimension and high-modulus components becomes restrictive. In this case, evaluation on a smaller circuit with bootstrapping to refresh the noise would in fact be an optimization rather than a bottleneck.
+
+Out implementation of the LWE scheme is as described above, in it we implement multiple optimizations to allow for quick computation of the circuit such as the modulus scaling property.
 
 
 %INCOMPLETE
