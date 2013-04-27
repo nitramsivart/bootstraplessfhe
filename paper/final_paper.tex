@@ -22,6 +22,9 @@
 % This version uses the latex2e styles, not the very ancient 2.09 stuff.
 \documentclass[letterpaper,twocolumn,10pt]{article}
 \usepackage{usenix,epsfig,endnotes}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+
+
 \begin{document}
 
 %don't want date printed
@@ -49,10 +52,10 @@ University of Michigan
 %\thispagestyle{empty}
 
 
-%DONE
-\subsection*{Abstract}
+%DONE -- REQUIRES FILL-IN-THE-BLANK
+\abstract{
 Fully homomorphic encryption (FHE) provides a way for third parties to compute arbitrary functions on encrypted data. This has the potential to revolutionize cloud computing services. Unfortunately, since their emergence in 2009, FHE schemes have become notorious for incurring enormous costs in time and space. Over the last four years optimizations have been proposed with impressive rapidity. However, these improvements are usually only asymptotically beneficial. The newness of the field and relative opacity of the literature has resulted in few implementations and evaluations of actual performance. To fill this gap, we implement a recent FHE scheme based on the Learning with Errors (LWE) hardness problem. We compare the performance of our system with an implementation of an earlier FHE scheme based on the Approximate GCD (AGC) hardness problem. We find that the LWE scheme performs [BETTER/WORSE] than the AGCD scheme. We release our system to the public to promote additional experimentation and to increase the accessibility of this new cryptographic construct.
-
+}
 
 %INCOMPLETE
 \section{Introduction}
@@ -60,7 +63,7 @@ Fully homomorphic encryption (FHE) is a cryptographic scheme where any function 
 
 FHE has profound implications for cloud computing services. The security and privacy concerns associated with providing your data to a third party are eliminated, as they will never see your decrypted data, and neither will anyone who compromises their system. Some applications of this are with medical records - hard to get a hold of, run statistics on, but no longer. Satellites - no longer need to trust a third party to keep secrets. Private search queries. Private location-based-services. Secure voting.
 
-Unfortunately, in their current state, FHE schemes incur too much overhead to be used in actual applications. [EXAMPLES OF COSTS]. 
+Unfortunately, in their current state, FHE schemes incur too much overhead to be used in actual applications. Even in some extremely recent examples, such as evaluating AES-128 encrpytion where they increased performance by orders of magnitude, the process required over three days to complete and 256 GB of RAM\cite{AES}. 
 
 Since the first FHE scheme was proposed in 2009, combatting the performance costs has been the primary focus of the FHE research community. They propose many optimizations, but mostly asymptotic results. Since they are theory folks and optimizations are coming out so rapidly, there have been few implementations. However, this means that it is hard to gauge whether or not optimizations that are asymptotically faster represent actual performance improvements. Without this feedback, it's hard to tell which branch of FHE to pursue.
 
@@ -82,13 +85,13 @@ In this section we provide a brief history and an explanation of the mechanics o
 The goal of FHE is to be able to perform arbitrary computations on ciphertext, such that the decrypted result is the same as the result of performing the same computations on the plaintext.
 
 To be capable of arbitrary computation, the cryptosystem need only support two operations, which we will call addition and multiplication, such that
-$$D(E(m_1) + E(m_2)) = m_1 + m_2$$
-$$D(E(m_1) * E(m_2)) = m_1 * m_2$$
+$$D_k(E_k(m_1) + E_k(m_2)) = m_1 + m_2$$
+$$D_k(E_k(m_1) * E_k(m_2)) = m_1 * m_2$$
 where $E$ and $D$ are the encryption and decryption functions.
 
 It has been shown elsewhere that supporting these two operations provides Turing completeness. However, for an intuitive explanation, consider that your computer can run arbitrary programs, yet all of the logical circuits in the hardware can be theoretically implementing using just AND and XOR gates. 
 
-For this reason, in the FHE literature all functions to be computed on ciphertext are called ``circuits" and are constructed as nested binary operations, such as $(E(1)+((E(1)*E(0)+E(1))$.
+For this reason, in the FHE literature all functions to be computed on ciphertext are called ``circuits" and are constructed as nested binary operations, such as $(E_k(1)+((E_k(1)*E_k(0)+E_k(1))$.
 
 Following suit, throughout the rest of this paper we assume that the operands $m_1$ and $m_2$ are single bits (either $0$ or $1$), and we assume that the addition and multiplication operations are equivalent to binary addition (XOR) and binary multiplication (AND).
 
@@ -108,23 +111,38 @@ Though the FHE literature quickly shifted away from representing ciphertext and 
 \subsection{Approximate GCD Schemes}
 A year after Gentry described the first FHE scheme, he released a second scheme that translated his lattice-based system into an integer-based system whose security relied on the Approximate GCD hardness problem~\cite{DGHV}. This system spawned a family of related AGCD schemes that tweak or optimize Gentry's original scheme.
 
-Gentry described a three-step process for constructing a fully homomorphic scheme. First he began with a SWHE scheme. Then he made it bootstrappable, which in his SWHE scheme also required squashing the decryption circuit. Each of these steps is described below.
+Gentry described a three-step process for constructing a fully homomorphic scheme. First he began with a SWHE scheme. However, as his thesis points out, when your system can evaluate its own decryption circuit, you become powerful enough to indefinitely compute. Which is what we want, however, as the scheme is only somewhat homomorphic it is the case that its decryption circuit is too complicated and requires too much nose introduction through multiplications. So the second step is to ``squash'' the decryption circuit by transforming the problem from its current encrypted space into a smaller encrypted space with much less complexity. After this is done it is possible to homomorphically decrypt the ciphertext to refresh the noise, effectively bootstraping the result into a much smaller noise range for more computation.
 
-\subsubsection{Somewhat Homomorphic Encryption Scheme} 
+\subsubsection{Somewhat Homomorphic \\Encryption Scheme} 
+First, we begin with the somewhat homomorphic design over the integers. Consider the encryption scheme $E_k(m) = m + 2e + pq$ where the private key $q leftarrow G(1^\lambda)$, $p < q$ an odd integer and the noise term $e << p$. Then this scheme will encrypt a single bit message which can be recovered with the decryption scheme $D_k(c) = (c \bmod p) \bmod 2$.
+
+One can see that both addition satisfies the homomorphism property that we are after; doing so with very minimal noise increase.
+$$E_k(m_1)+E_k(m_2)=m1+m2 + 2(e_1+e_2) + p(q_1+q_2)$$
+
+Similarly, multiplication also has this property, but with a caveat attached. By multiplying our ciphertexts we have also multiplied our error terms together, in very few multiplication steps, this error can grow out of control and quickly dwarf $p$. Once this happens, decryption fails as the number wraps around $\bmod p$
+
+It is important to note that the security of this scheme is directly replated to the difficulty of the Approximate Greatest Common Divisor problem, a problem which states that given $n$ near divisors of $p$ it is still difficult to compute $p$ if $p$ is relatively large.
+
 Start with SWHE scheme (describe. You can use the real public key, the real encryption with the zeros from the public key if you want, the decryption function, etc. Get mathy!). Mention AGCD hardness assumption.
 
-\subsubsection{Bootstrapping} 
-(describe).
-
 \subsubsection{Squashing the decryption circuit}
-This is where SSSP shows up.
+So we are able to do many additions, but only a few multiplications due to exponential growth. It is therefore necissary to ``squash'' the decryption circuit. The standard way to approach squashing this particular scheme is to give hints to the private key in the form of $E_p(p)$ and a Sparse Subset Sum problem involving $\frac{1}{p}$. With this additional information, homomorphic decryption becomes much more accessible and has a much smaller circuit.
+
+\subsubsection{Bootstrapping}
+What exactly does the decryption circuit look like? Remember that the traditional way to represent the decryption circuit for this scheme was with
+$$m = (m + 2e + pq \bmod p) \bmod 2$$
+However, we can not have the third party directly computing $\bmod p$ as that would entirely reveal our secret key $p$. Instead this modular arithmetic can be phrased as $c- p\floor(\frac{c}{p}) = m + 2e$. Finally, after noticing that we can see then, $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$. If it is possible to provide the necissary information for this method without revealing information about the private key, then it is possible to homomorphically decrypt.
+
+As mentioned above, this is done though the sparse subset problem. Encrypt values into a large encrypted vector $S$ which has a very sparse subset summing to $\frac{1}{p}$. Next, construct a secret vector $v$ such that $v_i = E_p(0)$ if the $i^{th}$ element of $S$ is not used in the sparse subset and $v_i = E_p(1)$ if it is. Notice that $S.v = E_p(\frac{1}{p})$, however the third party does not know which subset of either vector was used in the computation.
+
+With this information the third party is able to evaluate the homomorphic decryption circuit without having to compute $\frac{1}{p}$, reducing the number of computations, and so the depth of the circuit.
 
 \subsubsection{Problems}
-Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, gotta bootstrap all the time, major time consumer. Additional problems with this family of schemes is the size of ciphertexts and keys (though some papers optimized \cite{StehleSteinfeld, SmartVercauteren, ImplementingGentry, CNT}), and also the extra reliance on SSSP.
+Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, there are many downsides to bootstrapping. The most costly downside is that bootstrapping is a very expensive operation in general. It requires a large amount of time to run\cite{NEEDED} and also can lead to large ciphertexts\cite{NEEDED}. Even with this in mind, many of the early families of fully homomorphic encryption schemes bootstrapped after every operation due to the large amount of noise introducted by their multiplication operation\cite{NEEDED}. There have been several recent advancements in implementations using bootstrapping\cite{StehleSteinfeld, SmartVercuteren, ImplementingGentry, CNT} but the research community has also focused intently on removing the necessity for bootstrapping entirely such as in Learning with Errors, the scheme that was implemented by this paper.
 
 %INCOMPLETE
 \subsection{Learning With Errors Schemes}
-In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Conveniently did not require SSSP, also eventually produced optimizations that allowed for elimination of bootstrapping~\cite{SansBootstrapping}, though it could still be implemented as an additional optimization. Ciphertext and key sizes also happened to be smaller than many (all?) AGCD schemes.
+In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Using a similar form to the AGCD-based scheme, these schemes viewed their ciphertext as randomly chosen vectors dotted and added with a secret key. Conveniently did not require SSSP, also eventually produced optimizations that allowed for elimination of bootstrapping~\cite{SansBootstrapping}, though it could still be implemented as an additional optimization. Ciphertext and key sizes also happened to be smaller than many (all?) AGCD schemes.
 
 DESCRIBE THE BASICS OF OUR LWE SCHEME (FROM \cite{SansBootstrapping}) IN DETAIL.
 
