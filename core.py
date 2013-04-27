@@ -58,30 +58,6 @@ def make_substitutions(q, n, L):
   return keys, substitutions
 
 
-def main():
-  # public info 
-  q = 2**10
-  n = 4
-  L = 3 #depth of circuit
-
-  keys, subs = make_substitutions(q, n, L)
-  test_mult(keys, subs)
-  return
-
-  print "\nTesting Modulus Dimension Reduction"
-  for i in range(40):
-    _,f1 = encrypt(1, keys[0], subs['varnames'][0], q)
-    fmod = modulusReduction(f1, subs['varnames'][0], n, q, subs['modsubs'][0])
-    fmod = modulusReduction(fmod, subs['varnames'][1], subs['k'][1], subs['p'][1], subs['modsubs'][1])
-
-    #print decrypt(fmod,z)
-    if(decrypt(fmod, keys[2]) != 1):
-      print "fail!"
-      break
-    if i == 39:
-      print "success!"
-
-
 #keyname must be a string, the same as the polynomial variable (aka, "s" or "t" or etc.)
 def keygen(n, q, keyname):
   pk = randlist(q, n)
