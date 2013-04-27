@@ -732,7 +732,7 @@ def main():
 
     print ("type=",models[i],"lambda=",lam[i])
     print ("---------------------------------")
-    print ("type=",models[i],"k=",k,"q=",q,"n=",n,"p=",p,"L=",math.floor(L))
+    print ("type=",models[i],"k=",k,"q=2**(k**2)","n=k**4","p=k**6log(q)","L=",math.floor(L))
 
     timer = time()
     string = "(0+1)"
@@ -754,17 +754,41 @@ def main():
 
     print ("type=",models[i],"lambda=",lam[i])
     print ("---------------------------------")
-    print ("type=",models[i],"k=",k,"q=",q,"n=",n,"p=",p,"L=",math.floor(L))
+    print ("type=",models[i],"k=",k,"q=2**(k**2)","n=k**4","p=k**6log(q)","L=",math.floor(L))
 
     timer = time()
-    string = "(((((0+1)*1)+(0+1))+(0+1))+(0+1))"
+    string = "(((0+1)*(0+0))+((0+1)+(1*0)))+((0+1)+(0+1))"
     evaluate(string)
     print (string," evaluated in ", time() - timer) 
 
     timer = time()
-    string = "((((1*1)+(0*1))*((1*1)+(0*1)))*1)"
+    string = "((1*1)+(0*1))*((1*1)+(0*1))"
     evaluate(string)
     print(string," evaluated in ", time() - timer)
+  
+  print("And with much higher security parameters")
+  for i in range(4):
+    k = lam[i]*10
+    n = k**4
+    q = 2**(k**2)
+    L = math.log(n,2)/3
+    p = n**2 * math.log(q,2) * k**2
+
+    print ("type=",models[i],"lambda=",lam[i])
+    print ("---------------------------------")
+    print ("type=",models[i],"k=",k,"q=2**(k**2)","n=k**4","p=k**6log(q)","L=",math.floor(L))
+
+    timer = time()
+    '''  string = "((1*1)*1)" <- This type of string does not work '''
+    string = "(((1*0)+(0*1))*((1*1)*(1*1)))+(((0*1)+(1*1))*((0*1)*(1*1)))"
+    evaluate(string)
+    print (string," evaluated in ", time() - timer) 
+
+    timer = time()
+    string = "(((1*1)*(1*1))+((1*1)*(1*1)))+(((1*1)*(1*1))+((1*1)*(1*1)))"
+    evaluate(string)
+    print(string," evaluated in ", time() - timer)
+  
   
 
 if __name__ == '__main__':
