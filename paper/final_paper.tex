@@ -22,6 +22,7 @@
 % This version uses the latex2e styles, not the very ancient 2.09 stuff.
 \documentclass[letterpaper,twocolumn,10pt]{article}
 \usepackage{usenix,epsfig,endnotes}
+\usepackage{amsfonts}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 
 
@@ -145,6 +146,9 @@ Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE sche
 In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Using a similar form to the AGCD-based scheme, the Learning with Errors Schemes\cite{SansBootstrapping} schemes viewed their ciphertext as randomly chosen vectors dotted and added with a secret key.
 $$E_s(m) = (a, <a,s> + 2e + m)$$
 $$D_c(x) = (<a,s> + 2e + m) - <a,x>$$
+
+The Learning with Errors problem is a very powerful problem to base cryptographic constructions on. It is rather famous for being as hard as worst-case lattice problems, allowing all constructions based soley on it to be secure under the assumption that worst-case lattice problems are hard.
+
 In this scheme, addition of two ciphertexts is done in the same way that addition would naively be done, however, when looking at the multiplication it is helpful to look at the invarient linear function $\phi(x) \equiv b - <a,x>$ and multiply these instead. When this is done it takes the key from dimension $n$ to dimension $n^2$ and so to maintain managable key sizes for even small circuit depth a relinearization step is necissary. For this to happen, it is necissary for the client to post encryptions of pairwise multiples of their secret key's entries. Luckily, the rings we are dealing with are communitive and so it is only necissary to post $E(s[i]s[j])$ for $0 \leq i \leq j \leq n$ where $s[0] \doteq 1$. This allows transformation from a keyspace in $s$ of degree $n^2$ to a second keyspace for a secret key $t$ of size $n$. If we assume circular security, then we can simply publish this transformation rather than a large chain of transformations and $s$ will then re-encrypt to itself.
 
 However, this does not negate the impact of noise, as the chain progresses, the noise will grow. To handle the noise it is helpful to observe the ratio between the noise $B$ and the modulus $q$. When $\frac{B}{q} \approx 1$ the noise overwhelms the message and so we prefer to have a small noise ratio. This is done with a well known property of modulus, if $ab \equiv ac \bmod ad$ then $b \equiv c \bmod d$. Just like in much of this work, we do not need exact precision as we are already dealing with an error term, instead we can approximate this effect even if
@@ -166,6 +170,11 @@ This section is for highlighting what makes our work different from previous wor
 
 %INCOMPLETE
 \section{Methodology}
+
+We began this project with a thorough investigation of FHE schemes in general, theoretical attacks on insecure schemes, and hardness assumptions and security parameters that current schemes are being based on. With this detailed background we moved toward an implementation stage by taking an existing FHE implementation written in Python SAGE and evaluating its performance. For a fair comparison to this method we then implemented our own version of the standard LWE FHE encryption scheme, also in Python SAGE.
+
+To establish test cases, it was necessary to observe the size of the security parameter in the AGCD implementation and establish an equivelant security parameter to run our LWE implementation with. The other parameters of our scheme, such as the dimension of the original secret key, the size of the modulus and the range of the error term are all determined by our security key in relations established by the implemented paper\cite{NEEDED}. We then evaluated several test cases to benchmark our implementation against theirs using these parameters.
+
 This is about the experimental design. Start off with a super high-level description of our approach. A.k.a, given an existing Python SAGE implementation for AGCD, write our own LWE implementation also in Python SAGE, and then benchmark each on a variety of parameters described here. 
 
 IMPORTANT: This is where we make the case that our benchmarking comparisons are fair. This whole section is not just describing but also \emph{justifying} our experimental design choices. Namely, the optimizations we chose, the parameters we chose, etc., and why those choices make it fair. 
@@ -175,6 +184,14 @@ This is the most important section of the paper. This is where the reader can te
 
 %INCOMPLETE
 \section{Implementation}
+The code works in several stages. A user-level interface has been designed to support modifiying the parameters used in the encryption process and parsing expression inputs for evaluation. [Insert more about the parser if you want to talk more about how it works]
+
+After the parser establishes the depth of the circuit, a list of public information is generated which transform the ciphertext between the necessary keys throughout the algorithm's multiple relinearization and dimension-modulus reduction operations.
+
+All random variables are generated uniformly within an appropriate range, for instance, the error term is not allowed to be large relative to the modulus $q$ and so it was generated within $\log(q)$. This reinforces the hardness of the LWE problem by using the same parameter space that is used in the classical problem.
+
+Throughout the process encryption and decryption are handled in the invariant form as elements of $\mathbb{Z}^n_q$ where multiplication is handled by a tensor product to $\mathbb{Z}^{n\times n}_q$ followed by relinearization back to elements of $\mathbb{Z}^n_q$ with degree less than $n$ and a modulus reduction to $\mathbb{Z}^k_p$ to reduce the noise incurred by a multiplication. This process is repeated until the final value has been computed.
+
 The nitty-gritty about the implementation. This can just be a straight-up description about how our code works.
 
 If you want to include code snippets, here's some example \LaTeX for that:
@@ -215,7 +232,7 @@ Can be short. Talk about the main results, particularly the impact. Were our res
 
 %INCOMPLETE
 \section{Future Work}
-The future work for this specific code is to refine it into a more module and adaptable structure for easy modification by a third party for review and experiementation. Additionally, a few more optimizations and code timing analysis will be necissary to ensure that the code is running as quickly as it can at the hardware level. Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
+The future work for this specific code is to refine it into a more module and adaptable structure for easy modification by a third party for review and experiementation. Additionally, a few more optimizations such as determining minimalistic parameters based on the depth of the circuit and code timing analysis will be necissary to ensure that the code is running as quickly as it can at the hardware level. Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
 
 Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
 
