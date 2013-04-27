@@ -56,7 +56,7 @@ Fully homomorphic encryption (FHE) provides a way for third parties to compute a
 
 %INCOMPLETE
 \section{Introduction}
-DESCRIPTION: In fully homomorphic encryption (FHE), is cryptographic scheme where any function can be computed on encrypted data, and the decrypted result will 
+Fully homomorphic encryption (FHE) is a cryptographic scheme where any function can be computed on encrypted data, and the decrypted result will be the correct answer.
 
 FHE has profound implications for cloud computing services. The security and privacy concerns associated with providing your data to a third party are eliminated, as they will never see your decrypted data, and neither will anyone who compromises their system. Some applications of this are with medical records - hard to get a hold of, run statistics on, but no longer. Satellites - no longer need to trust a third party to keep secrets. Private search queries. Private location-based-services. Secure voting.
 
@@ -64,7 +64,7 @@ Unfortunately, in their current state, FHE schemes incur too much overhead to be
 
 Since the first FHE scheme was proposed in 2009, combatting the performance costs has been the primary focus of the FHE research community. They propose many optimizations, but mostly asymptotic results. Since they are theory folks and optimizations are coming out so rapidly, there have been few implementations. However, this means that it is hard to gauge whether or not optimizations that are asymptotically faster represent actual performance improvements. Without this feedback, it's hard to tell which branch of FHE to pursue.
 
-Recently a scheme was proposed by [AUTHORS] that involves a new branch of FHE based on LWE. The authors state explicity that while their solutions are asymptotically faster, they don't know whether or not they're actually faster, than AGCD schemes(?).
+Recently a scheme was proposed in \cite{} that involves a new branch of FHE based on LWE. The authors state explicity that while their solutions are asymptotically faster, they don't know whether or not they're actually faster, than AGCD schemes(?).
 
 We answer this call by implementing it and comparing it to an optimized AGCD scheme by Coron, Naccache, and Tibouchi. This comparison adds to the sparse set of real-world FHE performance data points. We are also the first to release LWE FHE code to the public. This can be used for additional paramter exploration, cracking attempts, or a hands-on introduction to an FHE system.
 
@@ -88,29 +88,46 @@ For this reason, in the FHE literature all functions to be computed on ciphertex
 
 Following suit, throughout the rest of this paper we assume that the operands $m_1$ and $m_2$ are single bits (either $0$ or $1$), and we assume that the addition and multiplication operations are equivalent to binary addition (XOR) and binary multiplication (AND).
 
-%INCOMPLETE
+%DONE
 \subsection{Partial Homomorphism}
-Partially homomorphic schemes are those schemes FHE was first conceived of when examining properties of  
+Cryptographic schemes that support just one of the two necessary operations are called \emph{partially homomorphic}. The possiblity of FHE was first suggested after examining the partially homomorphic properties of RSA in 1978~\cite{Rivest}, although an actual FHE scheme was not successfullly devised until over thirty years later.
 
-%INCOMPLETE
+A cryptographic scheme that supports two operations but only for a limited number of successive operations is called \emph{somewhat homomorphic}. A somewhat homomorphic encryption (SWHE) scheme was crucial to the development of the first FHE scheme.
+
+%DONE
 \subsection{Lattices}
-The first working FHE scheme was proposed in 2009 by Craig Gentry~\cite{GentryThesis09, GentrySTOC09}. The system was based entirely on a mathematical construct called lattices, and the difficulty of solving certain problems using lattices. EG, SVP, CVP. However, this system was so complicated and hard to understand that it immediately spun off equivalent integer-based schemes~\cite{SmartVercauteren, DGHV} which we will describe in detail in the next section.
+The first working FHE scheme was proposed in 2009 by Craig Gentry~\cite{GentryThesis09, GentrySTOC09}. The system was based on a mathematical construct called lattices. In particular, the security of the scheme rested on the hardness of solving certain problems using lattices. However, this system was so complicated and difficult to understand that it immediately gave way to equivalent yet more intuitive integer-based schemes~\cite{SmartVercauteren, DGHV} which we will describe in detail in the next section.
 
-Though the literature moved away from representing things with lattices ASAP, it is worth noting that all current FHE schemes can ultimately trace their security back to lattice-based hardness problems. 
+Though the FHE literature quickly shifted away from representing ciphertext and keys using lattices, it is worth noting that all current FHE schemes can still ultimately trace their security back to lattice-based hardness problems. 
 
 %INCOMPLETE
 \subsection{Approximate GCD Schemes}
-Start with SWHE scheme (describe), add bootstrapping (describe).
-The bootstrapping theorem was key to creating FHE. Unfortunately, gotta bootstrap all the time, major time consumer. Plus the size of ciphertexts and keys (though some papers optimized), and also this extra reliance on SSSP.
+A year after Gentry described the first FHE scheme, he released a second scheme that translated his lattice-based system into an integer-based system whose security relied on the Approximate GCD hardness problem~\cite{DGHV}. This system spawned a family of related AGCD schemes that tweak or optimize Gentry's original scheme.
+
+Gentry described a three-step process for constructing a fully homomorphic scheme. First he began with a SWHE scheme. Then he made it bootstrappable, which in his SWHE scheme also required squashing the decryption circuit. Each of these steps is described below.
+
+\subsubsection{Somewhat Homomorphic Encryption Scheme} 
+Start with SWHE scheme (describe. You can use the real public key, the real encryption with the zeros from the public key if you want, the decryption function, etc. Get mathy!). Mention AGCD hardness assumption.
+
+\subsubsection{Bootstrapping} 
+(describe).
+
+\subsubsection{Squashing the decryption circuit}
+This is where SSSP shows up.
+
+\subsubsection{Problems}
+Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, gotta bootstrap all the time, major time consumer. Additional problems with this family of schemes is the size of ciphertexts and keys (though some papers optimized \cite{StehleSteinfeld, SmartVercauteren, ImplementingGentry, CNT}), and also the extra reliance on SSSP.
 
 %INCOMPLETE
 \subsection{Learning With Errors Schemes}
-Another scheme arose which made intuitive sense. Conveniently did not require SSSP, also eventually produced optimizations that allowed for elimination of bootstrapping, though it could still be implemented as an additional optimization.
+In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Conveniently did not require SSSP, also eventually produced optimizations that allowed for elimination of bootstrapping, though it could still be implemented as an additional optimization. Ciphertext and key sizes also happened to be smaller than many (all?) AGCD schemes.
+
+DESCRIBE THE BASICS OF OUR LWE SCHEME IN DETAIL.
 
 
 %INCOMPLETE
 \section{Related Work}
-Specifically, the implementation papers - the AES paper, Implementing Gentry (maybe? They actually wrote code, right?), the ``Practical" paper, the CNT/Scarab projects, whichever LWE was implemented but not released.
+Specifically, the implementation papers - the AES paper~\cite{AES}, Implementing Gentry (maybe? They actually wrote code, right?)~\cite{ImplementingGentry}, the ``Practical" paper~\cite{Practical}, the CNT/Scarab projects, whichever LWE was implemented but not released, etc.
 
 This section is for highlighting what makes our work different from previous work.
 
@@ -171,7 +188,7 @@ Can be short. Stuff not only that you'd want to do on this project in the future
 
 %INCOMPLETE
 \section{Conclusion}
-A summary - basically the abstract again, but more detailed about the results. State problem, state why problem is bad, state the solution we tried, state whether or not it worked and to what degree. Close with a line about the future of FHE.
+Despite the alacritous pace at which theoretical work is being done to improve the performance of fully homomorphic encryption, no one is doing sanity checks by implementing these schemes. This makes it difficult to know what actual progress is being made and which directions are most promising. To address this deficit, we implemented a LWE-based FHE scheme in Python and Sage and compared it to an existing implementation of an AGCD-based FHE scheme, also written in Python and Sage. We found that the LWE implementation performed [BETTER? To WHAT DEGREE?] than the AGCD implementation. In addition to expanding the corpus of FHE performance benchmarks, we also publicly release our code. We hope that this work helps provide direction to future FHE research and increases the accessibility of this new and exciting area of cryptography.
 
 
 %DONE
