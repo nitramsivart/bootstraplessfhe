@@ -132,7 +132,7 @@ So we are able to do many additions, but only a few multiplications due to expon
 \subsubsection{Bootstrapping}
 What exactly does the decryption circuit look like? Remember that the traditional way to represent the decryption circuit for this scheme was with
 $$m = (m + 2e + pq \bmod p) \bmod 2$$
-However, we can not have the third party directly computing $\bmod p$ as that would entirely reveal our secret key $p$. Instead this modular arithmetic can be phrased as $c- p\floor(\frac{c}{p}) = m + 2e$. Finally, after noticing that we can see then, $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$. If it is possible to provide the necissary information for this method without revealing information about the private key, then it is possible to homomorphically decrypt.
+However, we can not have the third party directly computing $\bmod p$ as that would entirely reveal our secret key $p$. Instead this modular arithmetic can be phrased as $c- p\floor{\frac{c}{p}} = m + 2e$. Finally, after noticing that we can see then, $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$. If it is possible to provide the necissary information for this method without revealing information about the private key, then it is possible to homomorphically decrypt.
 
 As mentioned above, this is done though the sparse subset problem. Encrypt values into a large encrypted vector $S$ which has a very sparse subset summing to $\frac{1}{p}$. Next, construct a secret vector $v$ such that $v_i = E_p(0)$ if the $i^{th}$ element of $S$ is not used in the sparse subset and $v_i = E_p(1)$ if it is. Notice that $S.v = E_p(\frac{1}{p})$, however the third party does not know which subset of either vector was used in the computation.
 
