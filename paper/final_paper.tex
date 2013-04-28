@@ -143,6 +143,7 @@ Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE sche
 
 %INCOMPLETE
 \subsection{Learning With Errors Schemes}
+\label{sec:lwe}
 In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Using a similar form to the AGCD-based scheme, the Learning with Errors Schemes\cite{SansBootstrapping} schemes viewed their ciphertext as randomly chosen vectors dotted and added with a secret key.
 $$E_s(m) = (a, <a,s> + 2e + m)$$
 $$D_c(x) = (<a,s> + 2e + m) - <a,x>$$
@@ -154,7 +155,7 @@ In this scheme, addition of two ciphertexts is done in the same way that additio
 However, this does not negate the impact of noise, as the chain progresses, the noise will grow. To handle the noise it is helpful to observe the ratio between the noise $B$ and the modulus $q$. When $\frac{B}{q} \approx 1$ the noise overwhelms the message and so we prefer to have a small noise ratio. This is done with a well known property of modulus, if $ab \equiv ac \bmod ad$ then $b \equiv c \bmod d$. Just like in much of this work, we do not need exact precision as we are already dealing with an error term, instead we can approximate this effect even if
 the terms do not divide as nicely. By doing this, we reduce the absolute value of the noise from $B^2$ after a multiplication back down to $B$. This allows us to evaluate $L$ depth circuits with modulus $q \geq B^L+1$ rather than having to require a modulus $q \geq B^{2^L}$. This method is called modulus reduction.
 
-To lower the complexity of the decryption circuit a sufficient amount it is also necissary to lower the dimension of the ciphertext which we are dealing with. This is done with dimension reduction, one should note from the relinearization stage that it isn't necissary to have $s$ and $t$ be of the same dimension. Using this fact, it is possible to convert the ciphertext from using a private key $s$ of dimension $n$ to a private key $t$ of dimension $k$. After these steps have been performed our ciphertext will have reduced noise, and reduced complexity which allows for bootstrapping as an optimization.
+To lower the complexity of the decryption circuit a sufficient amount it is also necessary to lower the dimension of the ciphertext which we are dealing with. This is done with dimension reduction, one should note from the relinearization stage that it isn't necessary to have $s$ and $t$ be of the same dimension. Using this fact, it is possible to convert the ciphertext from using a private key $s$ of dimension $n$ to a private key $t$ of dimension $k$. After these steps have been performed our ciphertext will have reduced noise, and reduced complexity which allows for bootstrapping as an optimization.
 
 The last statement might seem out of place to the reader, as bootstrapping was just described as being very inefficient. However, it can be an optimization if the depth of the circuit is large enough that evaluation on the high-dimension and high-modulus components becomes restrictive. In this case, evaluation on a smaller circuit with bootstrapping to refresh the noise would in fact be an optimization rather than a bottleneck.
 
@@ -178,28 +179,13 @@ To emphasize the validity of our comparison, we note that both implementations w
 
 %INCOMPLETE
 \section{Implementation}
-The code works in several stages. A user-level interface has been designed to support modifying the parameters used in the encryption process and parsing expression inputs for evaluation. [Insert more about the parser if you want to talk more about how it works]
+The code works in several stages. A user-level interface has been designed to support modifying the parameters used in the encryption process and parsing expression inputs for evaluation. The interface provides a simple and convenient way for users to verify that arbitrary functions can be applied to arbitrary inputs. In practice, function specification would be separate from data encryption so that multiple functions could be applied to the data at arbitrary points in time.
 
 After the parser establishes the depth of the circuit, a list of public information is generated which transform the ciphertext between the necessary keys throughout the algorithm's multiple relinearization and dimension-modulus reduction operations.
 
 All random variables are generated uniformly within an appropriate range, for instance, the error term is not allowed to be large relative to the modulus $q$ and so it was generated within $\log(q)$. This reinforces the hardness of the LWE problem by using the same parameter space that is used in the classical problem.
 
-Throughout the process encryption and decryption are handled in the invariant form as elements of $\mathbb{Z}^n_q$ where multiplication is handled by a tensor product to $\mathbb{Z}^{n\times n}_q$ followed by relinearization back to elements of $\mathbb{Z}^n_q$. Taking this result and transforming it to an encryption of the same message but in $\mathbb{Z}^k_p$ reduces the noise incurred by multiplication allowing for more multiplications without adverse affects from noise. This process is repeated until the final value has been computed.
-
-The nitty-gritty about the implementation. This can just be a straight-up description about how our code works.
-
-If you want to include code snippets, here's some example \LaTeX for that:
-
-{\tt \small
-\begin{verbatim}
-int main() {
-    int result = 1
-    if (result != 2) {
-        printf("You get here every time.\n");
-    }
-}
-\end{verbatim}
-}
+Once the public keys and supporting information have been generated, the circuit is evaluated. Throughout the process encryption and decryption are handled in the invariant form as elements of $\mathbb{Z}^n_q$ where multiplication is handled by a tensor product to $\mathbb{Z}^{n\times n}_q$ followed by relinearization back to elements of $\mathbb{Z}^n_q$ with degree less than $n$ and a modulus reduction to $\mathbb{Z}^k_p$ to reduce the noise incurred by a multiplication. This process is repeated until the final value has been computed. Modulus-dimension reduction and relinearization are both explained in Section~\ref{sec:lwe}, and optimizations proposed by Brakerski et al.~\cite{StandardLWE}. Once the final ciphertext is computed, our user-interface decrypts the result to verify that the circuit has been computed correctly.
 
 
 \section{Results}
