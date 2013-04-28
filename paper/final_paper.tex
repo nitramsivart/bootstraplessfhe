@@ -219,12 +219,17 @@ Our second set of tests attempts to analyze the efficiency of our scheme for dee
 
 %INCOMPLETE
 \section{Discussion}
+Although the results that we encountered were not what we were hoping for, especially in a code version released to the public, they do demonstrate one of the hardships of creating a fully homomorphic cryptographic system; it is necessary to understand the language which you are working in fully to take advantage of all optimizations available and to avoid all pitfalls.
+
+Although our implementation fell very far from its hopeful goal when being compared against the AGCD version, we feel that this is not an inditement of the LWE system but more a display of the level of optimizations that have been placed into the AGCD program which will be necissary to replicate in our future implementation of the LWE program.
+
 Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
 
 
 %INCOMPLETE
 \section{Future Work}
-The future work for this specific code is to refine it into a more module and adaptable structure for easy modification by a third party for review and experimentation. Additionally, a few more optimizations such as determining minimalistic parameters based on the depth of the circuit and code timing analysis will be necissary to ensure that the code is running as quickly as it can at the hardware level. Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
+There are several goals for the future. For this specific code two main goals are to refine it into a more module and adaptable structure for easy modification by a third party for review and experiementation and to optimize it by relying more heavily on Sage structures and experimenting with the fastest methods to do specific tasks. There are also a few more optimizations such as determining minimalistic parameters based on the depth of the circuit. 
+Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
 
 Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
 
@@ -236,7 +241,7 @@ Despite the alacritous pace at which theoretical work is being done to improve t
 
 %DONE
 \section{Availability}
-We feel very strongly that releasing our implementation to the public for examination and experimentation is one of the major contributions of this work. Our code and directions for running it can be found at:
+We feel that releasing our implementation to the public for examination and experimentation is one of the major contributions of this work. Our code and directions for running it can be found at:
 
 \begin{center}
 {\tt https://github.com/tbmbob/bootstraplessfhe}\\
