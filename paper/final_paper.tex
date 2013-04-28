@@ -168,9 +168,11 @@ The last statement might seem out of place to the reader, as bootstrapping was j
 
 %INCOMPLETE
 \section{Related Work}
-There are a few implementations of FHE schemes that have been used in papers over the past four years. Specifically, implementations such as the evaluation of the 128-AES circuit\cite{AES} where the authors aimed to show that their scheme was powerful enough to handle the AES circuit, Implementing Gentry\cite{ImplementingGentry}, the ``Practical" paper\cite{Practical}, and the Coron and Scarab projects. All of these have implemented various FHE encryption schemes and have shown optimizations over previous versions while still having their drawbacks. 
+There are a few implementations of FHE schemes that have been used in papers over the past four years. However, many of these implementations have been rough prototypes, provided little performance data, or have not been released publicly. 
 
-In \cite{ImplementingGentry}, bootstrapping an AGCD-based scheme took between 30 seconds for toy examples and 30 minutes for larger examples. In \cite{AES}, a homomorphic implementation of the AES circuit either took 150 hours to generate the key schedule or a time-out occurred before even a single iteration completed\cite{AES}. These implementations attempt to improve upon previous works and offer a quick benchmark for the possible implementation of the scheme before moving onto the next. We intend this project to provide a point of reference for this scheme with hopes that future improvements can be easily added by either the authors or by third parties.
+In \cite{Practical}, the authors provide a rough proof-of-concept of a FHE scheme based on the Ring-LWE hardness problem without any optimizations. 
+
+In \cite{ImplementingGentry}, bootstrapping an AGCD-based scheme took between 30 seconds for toy examples and 30 minutes for larger examples. In \cite{AES}, a Ring-LWE-based homomorphic implementation of the AES circuit either took 150 hours to generate the key schedule or a time-out occurred before even a single iteration completed. These papers only offer rough benchmarks for their specific scheme. We intend this project to provide a point of reference for this scheme with hopes that future improvements can be easily added by either the authors or by third parties.
 
 %This section is for highlighting what makes our work different from previous work.
 
