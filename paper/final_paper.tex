@@ -166,7 +166,7 @@ Our implementation of the LWE scheme is as described above, in it we use multipl
 \section{Related Work}
 There are a few implementations of FHE schemes that have been used in papers over the past four years. Specifically, implementations such as the evaluation of the 128-AES circuit\cite{AES} where the authors aimed to show that their scheme was powerful enough to handle the AES circuit, Implementing Gentry\cite{ImplementingGentry}, the ``Practical" paper\cite{Practical}, and the Coron and Scarab projects. All of these have implemented various FHE encryption schemes and have shown optimizations over previous versions while still having their drawbacks. For instance, bootstrapping taking between 30 seconds for toy examples and 30 minutes for larger examples\cite{ImplementingGentry} and generation of the key scheduling taking 150 hours or evaluation timing out before even a single iteration is complete\cite{AES}. These implementations attempt to improve upon previous works and offer a quick benchmark for the possible implementation of the scheme before moving onto the next. We intend this project to provide a point of reference for this scheme with hopes that future improvements can be easily added by either the authors or by third parties.
 
-This section is for highlighting what makes our work different from previous work.
+%This section is for highlighting what makes our work different from previous work.
 
 
 \section{Methodology}
@@ -203,7 +203,7 @@ The results that we encountered were not exactly what we were hoping for, as we 
 
 We feel it necissary to reiterate that even with these pitfalls, our code does scale better with increased security parameters (fortunately this is where cryptography is done). This is a very good indication that LWE is indeed an asymptotically better solution than AGCD and we feel that further increasing the performance of our code will undoubtedly force the break even point much closer to the toy example given.
 
-Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
+%Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
 
 
 %INCOMPLETE
@@ -212,7 +212,7 @@ There are several goals for the future. For this specific code two main goals ar
 
 Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
 
-Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
+%Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
 
 
 %INCOMPLETE
