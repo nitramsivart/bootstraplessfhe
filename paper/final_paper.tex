@@ -55,7 +55,7 @@ University of Michigan
 
 %DONE -- REQUIRES FILL-IN-THE-BLANK
 \abstract{
-Fully homomorphic encryption (FHE) provides a way for third parties to compute arbitrary functions on encrypted data. This has the potential to revolutionize cloud computing services. Unfortunately, since their emergence in 2009, FHE schemes have become notorious for incurring enormous costs in time and space. Over the last four years optimizations have been proposed with impressive rapidity. However, these improvements are usually only asymptotically beneficial. The newness of the field and relative opacity of the literature has resulted in few implementations and evaluations of actual performance. To fill this gap, we implement a recent FHE scheme based on the Learning with Errors (LWE) hardness problem. We compare the performance of our system with an implementation of an earlier FHE scheme based on the Approximate GCD (AGC) hardness problem. We find that the LWE scheme performs [BETTER/WORSE] than the AGCD scheme. We release our system to the public to promote additional experimentation and to increase the accessibility of this new cryptographic construct.
+Fully homomorphic encryption (FHE) provides a way for third parties to compute arbitrary functions on encrypted data. This has the potential to revolutionize cloud computing services. Unfortunately, since their emergence in 2009, FHE schemes have become notorious for incurring enormous costs in time and space. Over the last four years optimizations have been proposed with impressive rapidity. However, these improvements are usually only asymptotically beneficial. The newness of the field and relative opacity of the literature has resulted in few implementations and evaluations of actual performance. To fill this gap, we implement a recent FHE scheme based on the Learning with Errors (LWE) hardness problem. We compare the performance of our system with an implementation of an earlier FHE scheme based on the Approximate GCD (AGC) hardness problem. We find that the LWE scheme performs much better than the AGCD scheme for anything larger than moderately sized security parameters. We release our system to the public to promote additional experimentation and to increase the accessibility of this new cryptographic construct.
 }
 
 %INCOMPLETE
@@ -68,7 +68,11 @@ Unfortunately, in their current state, FHE schemes incur too much overhead to be
 
 Since the first FHE scheme was proposed in 2009, combating the performance costs has been the primary focus of the FHE research community. They propose many optimizations, but mostly asymptotic results. Since they are theory folks and optimizations are coming out so rapidly, there have been few implementations. However, this means that it is hard to gauge whether or not optimizations that are asymptotically faster represent actual performance improvements. Without this feedback, it's hard to tell which branch of FHE to pursue.
 
+<<<<<<< HEAD
 Recently a scheme was proposed by Brakerski, Gentry, and Vaikuntanathan in \cite{SansBootstrapping} that involves a new branch of FHE based on LWE that is able to operate without bootstrapping. The authors state explicitly that while their solutions are asymptotically faster, they don't know whether or not they're actually faster in practice than earlier schemes:
+=======
+Recently a scheme was proposed by Brakerski, Gentry, and Vaikuntanathan in \cite{SansBootstrapping} that involves a new branch of FHE based on Learning with Errors that is able to operate without bootstrapping. The authors state explicity that while their solutions are asymptotically faster, they don't know whether or not they're actually faster in practice than earlier schemes:
+>>>>>>> 72719b25a301a88cdcf753b9b0262c788fa948e7
 
 \begin{quotation}
 ``Performance-wise, this scheme trounces previous (bootstrapping-based) FHE schemes (at least asymptotically; the concrete performance remains to be seen)."
@@ -100,7 +104,7 @@ Following suit, throughout the rest of this paper we assume that the operands $m
 \subsection{Partial Homomorphism}
 Cryptographic schemes that support just one of the two necessary operations are called \emph{partially homomorphic}. The possibility of FHE was first suggested after examining the partially homomorphic properties of RSA in 1978~\cite{Rivest}, although an actual FHE scheme was not successfully devised until over thirty years later.
 
-A cryptographic scheme that supports two operations but only for a limited number of successive operations is called \emph{somewhat homomorphic}. A somewhat homomorphic encryption (SWHE) scheme was crucial to the development of the first FHE scheme.
+A cryptographic scheme that supports two operations but only for a limited number of successive operations is called \emph{somewhat homomorphic}. A somewhat homomorphic encryption (SWHE) scheme was crucial to the development of the first FHE scheme and in most every subsequent scheme.
 
 %DONE
 \subsection{Lattices}
@@ -133,7 +137,11 @@ This is done without revealing $p$ by taking advantage of the hardness of the Sp
 
 \subsubsection{Bootstrapping}
 
+<<<<<<< HEAD
 Using a homomorphic implementation of the squashed decryption circuit $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$ and $\frac{1}{p}$, a third party can now periodically refresh the noise of intermediate results, or \emph{bootstrap}, allowing indefinite computation without ever seeing plaintext or the secret key.
+=======
+With this information the third party is able to evaluate the homomorphic decryption circuit without having to compute either $p$ or $\frac{1}{p}$, reducing the number of computations, and so the depth of the circuit.
+>>>>>>> 72719b25a301a88cdcf753b9b0262c788fa948e7
 
 \subsubsection{Problems}
 Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, there are many downsides to bootstrapping. The most costly downside is that bootstrapping is a very expensive operation in general. It requires a large amount of time to run\cite{ImplementingGentry} and also can lead to large ciphertexts. Even with this in mind, many of the early fully homomorphic encryption schemes bootstrapped after every operation due to the large amount of noise introduced by their multiplication operations. There have been several recent advancements in implementations using bootstrapping\cite{StehleSteinfeld, SmartVercauteren, ImplementingGentry, CNT} but the research community has also investigated whether it is possible to remove the necessity for bootstrapping entirely. 
@@ -160,9 +168,11 @@ The last statement might seem out of place to the reader, as bootstrapping was j
 
 %INCOMPLETE
 \section{Related Work}
-There are a few implementations of FHE schemes that have been used in papers over the past four years. Specifically, implementations such as the evaluation of the 128-AES circuit\cite{AES} where the authors aimed to show that their scheme was powerful enough to handle the AES circuit, Implementing Gentry\cite{ImplementingGentry}, the ``Practical" paper\cite{Practical}, and the Coron and Scarab projects. All of these have implemented various FHE encryption schemes and have shown optimizations over previous versions while still having their drawbacks. For instance, bootstrapping taking between 30 seconds for small examples and 30 minutes for larger examples\cite{ImplementingGentry} and generation of the key scheduling taking 150 hours or evaluation timing out before even a single iteration is complete\cite{AES}. These implementations attempt to improve upon previous works and offer a quick benchmark for the possible implementation of the scheme before moving onto the next. We intend this project to provide a static point of reference for this scheme with hopes that future improvements can be easily added by either the authors or by third parties.
+There are a few implementations of FHE schemes that have been used in papers over the past four years. Specifically, implementations such as the evaluation of the 128-AES circuit\cite{AES} where the authors aimed to show that their scheme was powerful enough to handle the AES circuit, Implementing Gentry\cite{ImplementingGentry}, the ``Practical" paper\cite{Practical}, and the Coron and Scarab projects. All of these have implemented various FHE encryption schemes and have shown optimizations over previous versions while still having their drawbacks. 
 
-This section is for highlighting what makes our work different from previous work.
+In \cite{ImplementingGentry}, bootstrapping an AGCD-based scheme took between 30 seconds for toy examples and 30 minutes for larger examples. In \cite{AES}, a homomorphic implementation of the AES circuit either took 150 hours to generate the key schedule or a time-out occurred before even a single iteration completed\cite{AES}. These implementations attempt to improve upon previous works and offer a quick benchmark for the possible implementation of the scheme before moving onto the next. We intend this project to provide a point of reference for this scheme with hopes that future improvements can be easily added by either the authors or by third parties.
+
+%This section is for highlighting what makes our work different from previous work.
 
 
 \section{Methodology}
@@ -190,18 +200,16 @@ Our implementation test consisted of two batteries of tests for varying security
 
 As our figure shows, their performance is much greater for small security parameters. This is mainly due to the large difference in Sage programming experience between Coron et al. and the authors of this report. We believe there are many more efficient ways to express the polynomial operations we used, but we did not have time to optimize these operations. However, we see that, asymptotically, our implementation outperforms theirs. For large security parameters, the inherent efficiency advantage of learning with errors over approximate gcd becomes apparent. Additionally, we see that, in the limit of large security parameter, their addition and multiplication operations take about the same time. This is because the time of encrypting extremely large ciphertexts swamps the time required for bootstrapping. In the learning with errors based scheme, contrarily, multiplication remains approximately twice as slow as addition, even in the limit of large ciphertexts.
 
-Our second set of tests attempts to analyze the efficiency of our scheme for deeper circuits. We first show that our scheme scales well - executing functions with several multiplications and additions takes only a little bit more time than performing one multiplication alone. Secondly, we find that deeper circuits, requiring more modulus-dimension reduction, are not necessarily slower than circuits with more operations. Results for the second set of tests can be found in Figure~\ref{fig:depth}.
+Our second set of tests attempts to analyze the efficiency of our scheme for deeper circuits. We first show that our scheme scales well - executing functions with several multiplications and additions takes only a small amount more time than performing one multiplication alone. Secondly, we find that deeper circuits, requiring more modulus-dimension reduction, are not necessarily slower than circuits with more operations. Results for the second set of tests can be found in Figure~\ref{fig:depth}.
 
 
 %INCOMPLETE
 \section{Discussion}
-The results that we encountered were not exactly what we were hoping for, especially in a code version released to the public, they do demonstrate one of the hardships of creating a fully homomorphic cryptographic system; it is necessary to understand the language which you are working in fully to take advantage of all optimizations available and to avoid all pitfalls.
+The results that we encountered were not exactly what we were hoping for, as we were hoping to have shown that the LWE scheme not only outperforms asymtotically but also definitively in much smaller cases. This however does demonstrate one of the hardships of creating a fully homomorphic cryptographic system; it is necessary to understand the language which you are working in fully to take advantage of all optimizations available and to avoid all pitfalls.
 
-Although our implementation fell short of its hopeful goal when being compared against the AGCD version, we feel that this is not an indictment of the LWE system but more a display of the level of optimizations that have been placed into the AGCD program which will be necessary to replicate in our future implementation of the LWE program.
+We feel it necissary to reiterate that even with these pitfalls, our code does scale better with increased security parameters (fortunately this is where cryptography is done). This is a very good indication that LWE is indeed an asymptotically better solution than AGCD and we feel that further increasing the performance of our code will undoubtedly force the break even point much closer to the toy example given.
 
-It should be noted however that our code does scale better with increased security parameters (fortunately this is where cryptography is done). This is a very good indication that LWE is indeed an asymptotically better solution than AGCD and we feel that further increasing the performance of our code will undoubtedly force the break even point much closer to the toy example given.
-
-Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
+%Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
 
 
 %INCOMPLETE
@@ -210,12 +218,12 @@ There are several goals for the future. For this specific code two main goals ar
 
 Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
 
-Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
+%Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
 
 
 %INCOMPLETE
 \section{Conclusion}
-Despite the alacritous pace at which theoretical work is being done to improve the performance of fully homomorphic encryption, no one is doing sanity checks by implementing these schemes. This makes it difficult to know what actual progress is being made and which directions are most promising. To address this deficit, we implemented a LWE-based FHE scheme in Python and Sage and compared it to an existing implementation of an AGCD-based FHE scheme, also written in Python and Sage. We found that the LWE implementation performed [BETTER? To WHAT DEGREE?] than the AGCD implementation. In addition to expanding the corpus of FHE performance benchmarks, we also publicly release our code. We hope that this work helps provide direction to future FHE research and increases the accessibility of this new and exciting area of cryptography.
+Despite the alacritous pace at which theoretical work is being done to improve the performance of fully homomorphic encryption, no one is doing sanity checks by implementing these schemes. This makes it difficult to know what actual progress is being made and which directions are most promising. To address this deficit, we implemented a LWE-based FHE scheme in Python and Sage and compared it to an existing implementation of an AGCD-based FHE scheme, also written in Python and Sage. We found that the LWE implementation performed asymtotically better than the AGCD implementation by a very quickly increasing margin. In addition to expanding the corpus of FHE performance benchmarks, we also publicly release our code. We hope that this work helps provide direction to future FHE research and increases the accessibility of this new and exciting area of cryptography.
 
 
 %DONE
@@ -233,7 +241,8 @@ If you have questions, we will do our best to answer them.
 \bibliography{final_paper}
 
 % this is at the end so it can be one column, on its own page
-\begin{figure}[tp]
+\newpage
+\begin{figure}[t]
 \begin{center}
 \onecolumn
 \begin{tabular}{|c|c|c|c|c|c|} \hline
