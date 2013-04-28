@@ -210,10 +210,11 @@ int main() {
 
 %INCOMPLETE
 \section{Results}
-Here's a typical figure reference. The figure is centered at the top of the column. It's scaled. It's explicitly placed. You'll have to tweak the numbers to get what you want.\\
+Our implementation test consisted of two batteries of tests for varying security parameters. In the first, designed to compare our implementation to the implementation by Coron et al~\cite{CNT}, we analyze the running time for adding and multiplying one encrypted bit. Our times include time to encrypt. Figure~\ref{fig:coron}.
 
+Results for the second set of tests can be found in Figure~\ref{fig:depth}.
 
-This text came after the figure, so we'll casually refer to Figure 1 as we go on our merry way.
+Intel i7 2.67 Ghz Quad Core with 24 GB of RAM.
 
 
 %INCOMPLETE
@@ -256,17 +257,30 @@ If you have questions, we will do our best to answer them.
 \begin{figure}[t]
 \begin{center}
 \onecolumn
-\begin{tabular}{|c|c|c|c|c|} \hline
-Example size & Security Parameter & Their time & Our time & ? \\ \hline
-Toy & 42 & & &  \\ \hline
-Small & 52 & & &  \\ \hline
-Medium & 62 & & &  \\ \hline
-Large & 72 & & &  \\ \hline
-\hline
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+Example size & Security Parameter & Their add (s) & Their mult (s) & Our add (s) & Our mult (s) \\ \hline
+Toy & 42 & .048 & .560 & 18.0 & 35.9 \\ \hline
+Small & 52 & 3.38 & 7.37 & 48.9 & 98.6 \\ \hline
+Medium & 62 & 71 & 106 & 110.3 & 225.1 \\ \hline
+Large & 72 & 1460 & 1860 & 249 & 524.3 \\ \hline
 \end{tabular}
-
 \end{center}
-\caption{A comparison of performance for the Coron et al. implementation and our LWE-based implementation}
+\caption{Timing: Coron et al. implementation vs. our LWE-based implementation, for varying security parameters}
+\label{fig:coron}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+\begin{tabular}{|c|c|c|c|} \hline
+Example size & Security Parameter & 11 operations, depth 1 (s) & 7 operations, depth 2 (s) \\ \hline
+Toy & 42 & 42.5 & 39.4 \\ \hline
+Small & 52 & 109.3 & 109.5 \\ \hline
+Medium & 62 & 251.0 & 251.1 \\ \hline
+Large & 72 & ?? & ?? \\ \hline
+\end{tabular}
+\end{center}
+\caption{Timing: our LWE-based implementation for varying numbers of operations, depth}
+\label{fig:depth}
 \end{figure}
 
 \end{document}
