@@ -210,11 +210,11 @@ int main() {
 
 %INCOMPLETE
 \section{Results}
-Our implementation test consisted of two batteries of tests for varying security parameters. In the first, designed to compare our implementation to the implementation by Coron et al~\cite{CNT}, we analyze the running time for adding and multiplying one encrypted bit. Our times include time to encrypt. Figure~\ref{fig:coron}.
+Our implementation test consisted of two batteries of tests for varying security parameters. In the first, designed to compare our implementation to the implementation by Coron et al~\cite{CNT}, we analyze the running time for adding and multiplying one encrypted bit. All times include time to encrypt, perform the respective operation and decrypt. Their multiplication time also includes time for bootstrapping. Our multiplication time also includes time for relinearization and modulus-dimension reduction. We don't include these operations in the addition operation timings because they aren't required due to minimal noise increase. All parameters are chosen to give the level of security required by the security parameter, according to guidelines specified by the original authors. Timings can be found in Figure~\ref{fig:coron}. All tests were run on a Intel i7 2.67 GHz Quad Core processor with 24 GB of RAM.
 
-Results for the second set of tests can be found in Figure~\ref{fig:depth}.
+As our figure shows, their performance is much greater for small security parameters. This is mainly due to the large difference in Sage programming experience between Coron et al. and the authors of this report. We believe there are many more efficient ways to express the polynomial operations we used, but we did not have time to optimize these operations. However, we see that, asymptotically, our implementation outperforms theirs. For large security parameters, the inherent efficiency advantage of learning with errors over approximate gcd becomes apparent. Additionally, we see that, in the limit of large security parameter, their addition and multiplication operations take about the same time. This is because the time of encrypting extremely large ciphertexts swamps the time required for bootstrapping. In the learning with errors based scheme, contrarily, multiplication remains approximately twice as slow as addition, even in the limit of large ciphertexts.
 
-Intel i7 2.67 Ghz Quad Core with 24 GB of RAM.
+Our second set of tests attempts to analyze the efficiency of our scheme for deeper circuits. We first show that our scheme scales well - executing functions with several multiplications and additions takes only a little bit more time than performing one multiplication alone. Secondly, we find that deeper circuits, requiring more modulus-dimension reduction, are not necessarily slower than circuits with more operations. Results for the second set of tests can be found in Figure~\ref{fig:depth}.
 
 
 %INCOMPLETE
