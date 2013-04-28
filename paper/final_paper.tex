@@ -166,19 +166,19 @@ To sufficiently lower the complexity of the decryption circuit it is also necess
 The last statement might seem out of place to the reader, as bootstrapping was just described as being very inefficient. However, it can be an optimization if the depth of the circuit is large enough that evaluation on the high-dimension and high-modulus components becomes restrictive. In this case, evaluation on a smaller circuit with bootstrapping to refresh the noise would in fact be an optimization rather than a bottleneck.
 
 
-%INCOMPLETE
+%DONE
 \section{Related Work}
 There are a few implementations of FHE schemes that have been used in papers over the past four years. However, many of these implementations have been rough prototypes, provided little performance data, or have not been released publicly. 
 
-In \cite{Practical}, the authors provide a rough proof-of-concept of a FHE scheme based on the Ring-LWE hardness problem without any optimizations. 
+In \cite{ImplementingGentry}, bootstrapping an AGCD-based scheme took between 30 seconds for toy examples and 30 minutes for larger examples. In \cite{AES}, a Ring-LWE-based homomorphic implementation of the AES circuit either took 150 hours to generate the key schedule or a time-out occurred before even a single iteration completed. In \cite{Practical}, the authors provide a rough proof-of-concept of a FHE scheme based on the Ring-LWE hardness problem without any optimizations and provide a substantial amount of timing data, but do not release their code.
 
-In \cite{ImplementingGentry}, bootstrapping an AGCD-based scheme took between 30 seconds for toy examples and 30 minutes for larger examples. In \cite{AES}, a Ring-LWE-based homomorphic implementation of the AES circuit either took 150 hours to generate the key schedule or a time-out occurred before even a single iteration completed. These papers only offer rough benchmarks for their specific scheme. We intend this project to provide a point of reference for this scheme with hopes that future improvements can be easily added by either the authors or by third parties.
+Coron released on Github an implementation of the AGCD-based scheme he and his coauthors describe in \cite{CNT}, which also provides timing information \cite{Coron}. We intend for our project to provide a similar point of reference for a FHE scheme based on the standard LWE hardness problem.
 
 %This section is for highlighting what makes our work different from previous work.
 
 
 \section{Methodology}
-We began this project with a thorough investigation of FHE schemes in general, theoretical attacks on insecure schemes, and hardness assumptions and security parameters that current schemes are being based on. With this detailed background we moved toward an implementation stage by taking an existing FHE implementation written in Python SAGE and evaluating its performance. For a fair comparison to this method we then implemented our own version of the standard LWE FHE encryption scheme, also in Python SAGE.
+We take Coron et. al.'s' written in Python SAGE and evaluating its performance. For a fair comparison to this method we then implemented our own version of the standard LWE FHE encryption scheme, also in Python SAGE.
 
 To establish test cases, it was necessary to observe the size of the security parameter in the AGCD implementation and establish an equivalent security parameter to run our LWE implementation with. The other parameters of our scheme, such as the dimension of the original secret key, the size of the modulus and the range of the error term are all determined by our security key in relations established by the implemented paper\cite{StandardLWE}. We then evaluated several test cases to benchmark our implementation against theirs using these parameters. These test cases are described in Section~\ref{sec:results}.
 
