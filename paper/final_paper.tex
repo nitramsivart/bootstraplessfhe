@@ -178,7 +178,7 @@ To emphasize the validity of our comparison, we note that both implementations w
 
 %INCOMPLETE
 \section{Implementation}
-The code works in several stages. A user-level interface has been designed to support modifiying the parameters used in the encryption process and parsing expression inputs for evaluation. [Insert more about the parser if you want to talk more about how it works]
+The code works in several stages. A user-level interface has been designed to support modifying the parameters used in the encryption process and parsing expression inputs for evaluation. [Insert more about the parser if you want to talk more about how it works]
 
 After the parser establishes the depth of the circuit, a list of public information is generated which transform the ciphertext between the necessary keys throughout the algorithm's multiple relinearization and dimension-modulus reduction operations.
 
@@ -215,16 +215,16 @@ Our second set of tests attempts to analyze the efficiency of our scheme for dee
 \section{Discussion}
 The results that we encountered were not exactly what we were hoping for, especially in a code version released to the public, they do demonstrate one of the hardships of creating a fully homomorphic cryptographic system; it is necessary to understand the language which you are working in fully to take advantage of all optimizations available and to avoid all pitfalls.
 
-Although our implementation fell short of its hopeful goal when being compared against the AGCD version, we feel that this is not an inditement of the LWE system but more a display of the level of optimizations that have been placed into the AGCD program which will be necessary to replicate in our future implementation of the LWE program.
+Although our implementation fell short of its hopeful goal when being compared against the AGCD version, we feel that this is not an indictment of the LWE system but more a display of the level of optimizations that have been placed into the AGCD program which will be necessary to replicate in our future implementation of the LWE program.
 
-It should be noted however that our code does scale better with increased security parameters (fortunately this is where cryptography is done). This is a very good indication that LWE is indeed an asymptotically better solution than AGCD and we feel that further increasing the performance of our code will undoubtable force the break even point much closer to the toy example given.
+It should be noted however that our code does scale better with increased security parameters (fortunately this is where cryptography is done). This is a very good indication that LWE is indeed an asymptotically better solution than AGCD and we feel that further increasing the performance of our code will undoubtedly force the break even point much closer to the toy example given.
 
 Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
 
 
 %INCOMPLETE
 \section{Future Work}
-There are several goals for the future. For this specific code two main goals are to refine it into a more module and adaptable structure for easy modification by a third party for review and experiementation and to optimize it by relying more heavily on Sage structures and experimenting with the fastest methods to do specific tasks. There are also a few more optimizations such as determining minimalistic parameters based on the depth of the circuit. 
+There are several goals for the future. For this specific code two main goals are to refine it into a more module and adaptable structure for easy modification by a third party for review and experimentation and to optimize it by relying more heavily on Sage structures and experimenting with the fastest methods to do specific tasks. There are also a few more optimizations such as determining minimalistic parameters based on the depth of the circuit. 
 
 Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
 
