@@ -168,18 +168,12 @@ There are a few implementations of FHE schemes that have been used in papers ove
 This section is for highlighting what makes our work different from previous work.
 
 
-%INCOMPLETE
 \section{Methodology}
-
 We began this project with a thorough investigation of FHE schemes in general, theoretical attacks on insecure schemes, and hardness assumptions and security parameters that current schemes are being based on. With this detailed background we moved toward an implementation stage by taking an existing FHE implementation written in Python SAGE and evaluating its performance. For a fair comparison to this method we then implemented our own version of the standard LWE FHE encryption scheme, also in Python SAGE.
 
-To establish test cases, it was necessary to observe the size of the security parameter in the AGCD implementation and establish an equivelant security parameter to run our LWE implementation with. The other parameters of our scheme, such as the dimension of the original secret key, the size of the modulus and the range of the error term are all determined by our security key in relations established by the implemented paper\cite{StandardLWE}. We then evaluated several test cases to benchmark our implementation against theirs using these parameters.
+To establish test cases, it was necessary to observe the size of the security parameter in the AGCD implementation and establish an equivalent security parameter to run our LWE implementation with. The other parameters of our scheme, such as the dimension of the original secret key, the size of the modulus and the range of the error term are all determined by our security key in relations established by the implemented paper\cite{StandardLWE}. We then evaluated several test cases to benchmark our implementation against theirs using these parameters. These test cases are described in Section~\ref{sec:results}.
 
-This is about the experimental design. Start off with a super high-level description of our approach. A.k.a, given an existing Python SAGE implementation for AGCD, write our own LWE implementation also in Python SAGE, and then benchmark each on a variety of parameters described here. 
-
-IMPORTANT: This is where we make the case that our benchmarking comparisons are fair. This whole section is not just describing but also \emph{justifying} our experimental design choices. Namely, the optimizations we chose, the parameters we chose, etc., and why those choices make it fair. 
-
-This is the most important section of the paper. This is where the reader can tell whether we did good science or bad science.
+To emphasize the validity of our comparison, we note that both implementations were straightforward extensions of mathematically specified schemes from their respective papers. Further, each scheme was evaluated for the same set of security parameters, with additional parameters chosen to give the desired level of security. Additional parameters were chosen according to the provably secure ranges provided in \cite{StandardLWE, CNT}. Our tests were run in similar environments on the same computer. Due to these similarities, we reduce the possibility for performance differences to either differences in fundamental efficiency or differences in programming efficiency. These are discussed in Section~\ref{sec:results}.
 
 
 %INCOMPLETE
@@ -208,8 +202,8 @@ int main() {
 }
 
 
-%INCOMPLETE
 \section{Results}
+\label{sec:results}
 Our implementation test consisted of two batteries of tests for varying security parameters. In the first, designed to compare our implementation to the implementation by Coron et al~\cite{CNT}, we analyze the running time for adding and multiplying one encrypted bit. All times include time to encrypt, perform the respective operation and decrypt. Their multiplication time also includes time for bootstrapping. Our multiplication time also includes time for relinearization and modulus-dimension reduction. We don't include these operations in the addition operation timings because they aren't required due to minimal noise increase. All parameters are chosen to give the level of security required by the security parameter, according to guidelines specified by the original authors. Timings can be found in Figure~\ref{fig:coron}. All tests were run on a Intel i7 2.67 GHz Quad Core processor with 24 GB of RAM.
 
 As our figure shows, their performance is much greater for small security parameters. This is mainly due to the large difference in Sage programming experience between Coron et al. and the authors of this report. We believe there are many more efficient ways to express the polynomial operations we used, but we did not have time to optimize these operations. However, we see that, asymptotically, our implementation outperforms theirs. For large security parameters, the inherent efficiency advantage of learning with errors over approximate gcd becomes apparent. Additionally, we see that, in the limit of large security parameter, their addition and multiplication operations take about the same time. This is because the time of encrypting extremely large ciphertexts swamps the time required for bootstrapping. In the learning with errors based scheme, contrarily, multiplication remains approximately twice as slow as addition, even in the limit of large ciphertexts.
@@ -279,7 +273,6 @@ Example size & Security Parameter & 11 operations, depth 1 (s) & 7 operations, d
 Toy & 42 & 42.5 & 39.4 \\ \hline
 Small & 52 & 109.3 & 109.5 \\ \hline
 Medium & 62 & 251.0 & 251.1 \\ \hline
-Large & 72 & ?? & ?? \\ \hline
 \end{tabular}
 \end{center}
 \caption{Timing: our LWE-based implementation for varying numbers of operations, depth}
