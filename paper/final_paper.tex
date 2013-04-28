@@ -133,11 +133,7 @@ This is done without revealing $p$ by taking advantage of the hardness of the Sp
 
 \subsubsection{Bootstrapping}
 
-<<<<<<< HEAD
 Using a homomorphic implementation of the squashed decryption circuit $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$ and $\frac{1}{p}$, a third party can now periodically refresh the noise of intermediate results, or \emph{bootstrap}, allowing indefinite computation without ever seeing plaintext or the secret key.
-=======
-With this information the third party is able to evaluate the homomorphic decryption circuit without having to compute either $p$ or $\frac{1}{p}$, reducing the number of computations, and so the depth of the circuit.
->>>>>>> 72719b25a301a88cdcf753b9b0262c788fa948e7
 
 \subsubsection{Problems}
 Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, there are many downsides to bootstrapping. The most costly downside is that bootstrapping is a very expensive operation in general. It requires a large amount of time to run\cite{ImplementingGentry} and also can lead to large ciphertexts. Even with this in mind, many of the early fully homomorphic encryption schemes bootstrapped after every operation due to the large amount of noise introduced by their multiplication operations. There have been several recent advancements in implementations using bootstrapping\cite{StehleSteinfeld, SmartVercauteren, ImplementingGentry, CNT} but the research community has also investigated whether it is possible to remove the necessity for bootstrapping entirely. 
