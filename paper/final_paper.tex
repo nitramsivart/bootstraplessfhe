@@ -64,17 +64,17 @@ Fully homomorphic encryption (FHE) is a cryptographic scheme where any function 
 
 FHE has profound implications for cloud computing services. The security and privacy concerns associated with providing your data to a third party are eliminated, as they will never see your decrypted data, and neither will anyone who compromises their system. Some applications of this are with medical records - hard to get a hold of, run statistics on, but no longer. Satellites - no longer need to trust a third party to keep secrets. Private search queries. Private location-based-services. Secure voting.
 
-Unfortunately, in their current state, FHE schemes incur too much overhead to be used in actual applications. Even in some extremely recent examples, such as evaluating AES-128 encrpytion where they increased performance by orders of magnitude, the process required over three days to complete and 256 GB of RAM\cite{AES}. 
+Unfortunately, in their current state, FHE schemes incur too much overhead to be used in actual applications. Even in some extremely recent examples, such as evaluating AES-128 encryption where they increased performance by orders of magnitude, the process required over three days to complete and 256 GB of RAM\cite{AES}. 
 
-Since the first FHE scheme was proposed in 2009, combatting the performance costs has been the primary focus of the FHE research community. They propose many optimizations, but mostly asymptotic results. Since they are theory folks and optimizations are coming out so rapidly, there have been few implementations. However, this means that it is hard to gauge whether or not optimizations that are asymptotically faster represent actual performance improvements. Without this feedback, it's hard to tell which branch of FHE to pursue.
+Since the first FHE scheme was proposed in 2009, combating the performance costs has been the primary focus of the FHE research community. They propose many optimizations, but mostly asymptotic results. Since they are theory folks and optimizations are coming out so rapidly, there have been few implementations. However, this means that it is hard to gauge whether or not optimizations that are asymptotically faster represent actual performance improvements. Without this feedback, it's hard to tell which branch of FHE to pursue.
 
-Recently a scheme was proposed by Brakerski, Gentry, and Vaikuntanathan in \cite{SansBootstrapping} that involves a new branch of FHE based on LWE that is able to operate without bootstrapping. The authors state explicity that while their solutions are asymptotically faster, they don't know whether or not they're actually faster in practice than earlier schemes:
+Recently a scheme was proposed by Brakerski, Gentry, and Vaikuntanathan in \cite{SansBootstrapping} that involves a new branch of FHE based on LWE that is able to operate without bootstrapping. The authors state explicitly that while their solutions are asymptotically faster, they don't know whether or not they're actually faster in practice than earlier schemes:
 
 \begin{quotation}
 ``Performance-wise, this scheme trounces previous (bootstrapping-based) FHE schemes (at least asymptotically; the concrete performance remains to be seen)."
 \end{quotation}
 
-We answer this call by implementing it and comparing it to a bootstrapping AGCD-based scheme by Coron, Naccache, and Tibouchi. This comparison adds to the sparse set of real-world FHE performance data points. We are also the first to release LWE FHE code to the public. This can be used for additional paramter exploration, cracking attempts, or a hands-on introduction to an FHE system.
+We answer this call by implementing it and comparing it to a bootstrapping AGCD-based scheme by Coron, Naccache, and Tibouchi. This comparison adds to the sparse set of real-world FHE performance data points. We are also the first to release LWE FHE code to the public. This can be used for additional parameter exploration, cracking attempts, or a hands-on introduction to an FHE system.
 
 
 %DONE
@@ -98,7 +98,7 @@ Following suit, throughout the rest of this paper we assume that the operands $m
 
 %DONE
 \subsection{Partial Homomorphism}
-Cryptographic schemes that support just one of the two necessary operations are called \emph{partially homomorphic}. The possiblity of FHE was first suggested after examining the partially homomorphic properties of RSA in 1978~\cite{Rivest}, although an actual FHE scheme was not successfullly devised until over thirty years later.
+Cryptographic schemes that support just one of the two necessary operations are called \emph{partially homomorphic}. The possibility of FHE was first suggested after examining the partially homomorphic properties of RSA in 1978~\cite{Rivest}, although an actual FHE scheme was not successfully devised until over thirty years later.
 
 A cryptographic scheme that supports two operations but only for a limited number of successive operations is called \emph{somewhat homomorphic}. A somewhat homomorphic encryption (SWHE) scheme was crucial to the development of the first FHE scheme.
 
@@ -108,58 +108,54 @@ The first working FHE scheme was proposed in 2009 by Craig Gentry~\cite{GentryTh
 
 Though the FHE literature quickly shifted away from representing ciphertext and keys using lattices, it is worth noting that all current FHE schemes can still ultimately trace their security back to lattice-based hardness problems. 
 
-%INCOMPLETE
+%DONE
 \subsection{Approximate GCD Schemes}
 A year after Gentry described the first FHE scheme, he released a second scheme that translated his lattice-based system into an integer-based system whose security relied on the Approximate GCD hardness problem~\cite{DGHV}. This system spawned a family of related AGCD schemes that tweak or optimize Gentry's original scheme.
 
-Gentry described a three-step process for constructing a fully homomorphic scheme. First he began with a SWHE scheme. However, as his thesis points out, when your system can evaluate its own decryption circuit, you become powerful enough to indefinitely compute. Which is what we want, however, as the scheme is only somewhat homomorphic it is the case that its decryption circuit is too complicated and requires too much nose introduction through multiplications. So the second step is to ``squash'' the decryption circuit by transforming the problem from its current encrypted space into a smaller encrypted space with much less complexity. After this is done it is possible to homomorphically decrypt the ciphertext to refresh the noise, effectively bootstraping the result into a much smaller noise range for more computation.
+Gentry described a three-step process for constructing a fully homomorphic scheme. First he began with a SWHE scheme. The SHWE scheme he describes stops working after only a few optimizations because a noise term in the ciphertexts grows and overwhelms the rest of the message. You could refresh the noise by decrypting and re-encrypting the message. However, this is undesirable for third party computing. However, since decryption is a mathematical function, you could decrypt \emph{homomorphically} with an encryption of the private key. This would take a ciphertext and produce another ciphertext with reduced noise. However, the decryption circuit must take few enough operations that it introduces less noise than it takes out. So the second step is to ``squash'' the decryption circuit by transforming the problem from its current encrypted space into a smaller encrypted space with much less complexity. After this is done it is possible to perform the third step, homomorphically decrypting the ciphertext to refresh the noise, effectively \emph{bootstrapping} the result into a much smaller noise range for more computation.
 
 \subsubsection{Somewhat Homomorphic \\Encryption Scheme} 
-First, we begin with the somewhat homomorphic design over the integers. Consider the encryption scheme $E_k(m) = m + 2e + pq$ where the private key $q leftarrow G(1^\lambda)$, $p < q$ an odd integer and the noise term $e << p$. Then this scheme will encrypt a single bit message which can be recovered with the decryption scheme $D_k(c) = (c \bmod p) \bmod 2$.
+First, we begin with the somewhat homomorphic design over the integers. Consider the encryption scheme $E_k(m) = m + 2e + pq$ where the private key $q \leftarrow G(1^\lambda)$, $p < q$ an odd integer and the noise term $e << p$. Then this scheme will encrypt a single bit message which can be recovered with the decryption scheme $D_k(c) = (c \bmod p) \bmod 2$.
 
-One can see that both addition satisfies the homomorphism property that we are after; doing so with very minimal noise increase.
+One can see that addition satisfies the homomorphism property that we are after. Note that the noise term grows, albeit minimally:
 $$E_k(m_1)+E_k(m_2)=m1+m2 + 2(e_1+e_2) + p(q_1+q_2)$$
 
 Similarly, multiplication also has this property, but with a caveat attached. By multiplying our ciphertexts we have also multiplied our error terms together, in very few multiplication steps, this error can grow out of control and quickly dwarf $p$. Once this happens, decryption fails as the number wraps around $\bmod p$
 
-It is important to note that the security of this scheme is directly replated to the difficulty of the Approximate Greatest Common Divisor problem, a problem which states that given $n$ near divisors of $p$ it is still difficult to compute $p$ if $p$ is relatively large.
-
-Start with SWHE scheme (describe. You can use the real public key, the real encryption with the zeros from the public key if you want, the decryption function, etc. Get mathy!). Mention AGCD hardness assumption.
+The security of this SWHE scheme reduces to the difficulty of the Approximate Greatest Common Divisor problem, a problem which states that given $n$ near divisors of $p$ it is still difficult to compute $p$ if $p$ is relatively large.
 
 \subsubsection{Squashing the decryption circuit}
-So we are able to do many additions, but only a few multiplications due to exponential growth. It is therefore necissary to ``squash'' the decryption circuit. The standard way to approach squashing this particular scheme is to give hints to the private key in the form of $E_p(p)$ and a Sparse Subset Sum problem involving $\frac{1}{p}$. With this additional information, homomorphic decryption becomes much more accessible and has a much smaller circuit.
+So we are able to do many additions, but only a few multiplications due to exponential growth of the noise term. It is therefore necessary to ``squash'' the decryption circuit. Recall that the traditional way to represent the decryption circuit for this scheme was with
+$$m = (m + 2e + pq \bmod p) \bmod 2$$ 
+This modular arithmetic can also be expressed as $c- p\floor{\frac{c}{p}} = m + 2e$. Given that we are working with bits, this is the same as $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$. Taking this to be our new decryption function, we can further reduce the number of operations it requires to homomorphically decrypt by giving the third party a representation of $\frac{1}{p}$.
+
+This is done without revealing $p$ by taking advantage of the hardness of the Sparse Subset Sum Problem (SSSP). First construct a large vector $S$ which contains encrypted bits, some small subset of which sums to $\frac{1}{p}$. Next, construct a secret vector $v$ that serves as a bitmask that reveals which bits are summed to produce $\frac{1}{p}$. I.e., $v_i = E_p(0)$ if the $i^{th}$ element of $S$ is not used in the sparse subset and $v_i = E_p(1)$ if it is. Notice that $S*v = E_p(\frac{1}{p})$. In this way, the third party can use $\frac{1}{p}$ without knowing $p$.
 
 \subsubsection{Bootstrapping}
-What exactly does the decryption circuit look like? Remember that the traditional way to represent the decryption circuit for this scheme was with
-$$m = (m + 2e + pq \bmod p) \bmod 2$$
-However, we can not have the third party directly computing $\bmod p$ as that would entirely reveal our secret key $p$. Instead this modular arithmetic can be phrased as $c- p\floor{\frac{c}{p}} = m + 2e$. Finally, after noticing that we can see then, $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$. If it is possible to provide the necissary information for this method without revealing information about the private key, then it is possible to homomorphically decrypt.
 
-As mentioned above, this is done though the sparse subset problem. Encrypt values into a large encrypted vector $S$ which has a very sparse subset summing to $\frac{1}{p}$. Next, construct a secret vector $v$ such that $v_i = E_p(0)$ if the $i^{th}$ element of $S$ is not used in the sparse subset and $v_i = E_p(1)$ if it is. Notice that $S.v = E_p(\frac{1}{p})$, however the third party does not know which subset of either vector was used in the computation.
-
-With this information the third party is able to evaluate the homomorphic decryption circuit without having to compute $\frac{1}{p}$, reducing the number of computations, and so the depth of the circuit.
+Using a homomorphic implementation of the squashed decryption circuit $m = LSB(m + 2e) = LSB(c) - LSB(p\floor{\frac{c}{p}}) = m$ and $\frac{1}{p}$, a third party can now periodically refresh the noise of intermediate results, or \emph{bootstrap}, allowing indefinite computation without ever seeing plaintext or the secret key.
 
 \subsubsection{Problems}
-Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, there are many downsides to bootstrapping. The most costly downside is that bootstrapping is a very expensive operation in general. It requires a large amount of time to run\cite{ImplementingGentry} and also can lead to large ciphertexts. Even with this in mind, many of the early families of fully homomorphic encryption schemes bootstrapped after every operation due to the large amount of noise introduced by their multiplication operations. There have been several recent advancements in implementations using bootstrapping\cite{StehleSteinfeld, SmartVercauteren, ImplementingGentry, CNT} but the research community has also focused intently on removing the necessity for bootstrapping entirely such as in Learning with Errors, the scheme that was implemented by this paper.
+Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, there are many downsides to bootstrapping. The most costly downside is that bootstrapping is a very expensive operation in general. It requires a large amount of time to run\cite{ImplementingGentry} and also can lead to large ciphertexts. Even with this in mind, many of the early fully homomorphic encryption schemes bootstrapped after every operation due to the large amount of noise introduced by their multiplication operations. There have been several recent advancements in implementations using bootstrapping\cite{StehleSteinfeld, SmartVercauteren, ImplementingGentry, CNT} but the research community has also investigated whether it is possible to remove the necessity for bootstrapping entirely. 
 
-%INCOMPLETE
+One family of homomorphic schemes departed from the AGCD-based schemes like Gentry's and based their security on the hardness of Learning with Errors (LWE). This family of schemes recently produced a bootstrapless implementation, which we describe next.
+
+%DONE
 \subsection{Learning With Errors Schemes}
 \label{sec:lwe}
-In addition to AGCD-based schemes, another family of schemes arose which made intuitive sense. Using a similar form to the AGCD-based scheme, the Learning with Errors Schemes\cite{SansBootstrapping} schemes viewed their ciphertext as randomly chosen vectors dotted and added with a secret key.
+Using a form similar to Gentry's AGCD-based scheme, the Learning With Errors (LWE) schemes\cite{SansBootstrapping} viewed their ciphertext as randomly chosen vectors dotted and added with a secret key.
 $$E_s(m) = (a, <a,s> + 2e + m)$$
 $$D_c(x) = (<a,s> + 2e + m) - <a,x>$$
 
-The Learning with Errors problem is a very powerful problem to base cryptographic constructions on. It is rather famous for being as hard as worst-case lattice problems, allowing all constructions based soley on it to be secure under the assumption that worst-case lattice problems are hard.
+The Learning With Errors problem is a very powerful problem to base cryptographic constructions on. It is rather famous for being as hard as worst-case lattice problems, allowing all constructions based solely on it to be secure under the assumption that worst-case lattice problems are hard.
 
-In this scheme, addition of two ciphertexts is done in the same way that addition would naively be done, however, when looking at the multiplication it is helpful to look at the invarient linear function $\phi(x) \equiv b - <a,x>$ and multiply these instead. When this is done it takes the key from dimension $n$ to dimension $n^2$ and so to maintain managable key sizes for even small circuit depth a relinearization step is necissary. For this to happen, it is necissary for the client to post encryptions of pairwise multiples of their secret key's entries. Luckily, the rings we are dealing with are communitive and so it is only necissary to post $E(s[i]s[j])$ for $0 \leq i \leq j \leq n$ where $s[0] \doteq 1$. This allows transformation from a keyspace in $s$ of degree $n^2$ to a second keyspace for a secret key $t$ of size $n$. If we assume circular security, then we can simply publish this transformation rather than a large chain of transformations and $s$ will then re-encrypt to itself.
+In this scheme, addition of two ciphertexts is done in the same way that addition would naively be done. However, when looking at the multiplication it is helpful to look at the invariant linear function $\phi(x) \equiv b - <a,x>$ and multiply these instead. When this is done it takes the key from dimension $n$ to dimension $n^2$, so to maintain manageable key sizes for even small circuit depth a relinearization step is necessary. For this to happen, it is necessary for the client to post encryptions of pairwise multiples of their secret key's entries. Luckily, the rings we are dealing with are commutative and so it is only necessary to post $E(s[i]s[j])$ for $0 \leq i \leq j \leq n$ where $s[0] \doteq 1$. This allows transformation from a keyspace in $s$ of degree $n^2$ to a second keyspace for a secret key $t$ of size $n$. If we assume circular security, then we can simply publish this transformation rather than a large chain of transformations and $s$ will then re-encrypt to itself.
 
-However, this does not negate the impact of noise, as the chain progresses, the noise will grow. To handle the noise it is helpful to observe the ratio between the noise $B$ and the modulus $q$. When $\frac{B}{q} \approx 1$ the noise overwhelms the message and so we prefer to have a small noise ratio. This is done with a well known property of modulus, if $ab \equiv ac \bmod ad$ then $b \equiv c \bmod d$. Just like in much of this work, we do not need exact precision as we are already dealing with an error term, instead we can approximate this effect even if
-the terms do not divide as nicely. By doing this, we reduce the absolute value of the noise from $B^2$ after a multiplication back down to $B$. This allows us to evaluate $L$ depth circuits with modulus $q \geq B^L+1$ rather than having to require a modulus $q \geq B^{2^L}$. This method is called modulus reduction.
+However, this does not negate the impact of noise, as the chain progresses, the noise will grow. To handle the noise it is helpful to observe the ratio between the noise $B$ and the modulus $q$. When $\frac{B}{q} \approx 1$ the noise overwhelms the message. We would prefer to have a small noise ratio. This is done with a well-known property of modulus, if $ab \equiv ac \bmod ad$ then $b \equiv c \bmod d$. As in much of this work, we do not need exact precision as we are already dealing with an error term. Instead we can approximate this effect even if the terms do not divide as nicely. By doing this, we reduce the absolute value of the noise from $B^2$ after a multiplication back down to $B$. This allows us to evaluate $L$ depth circuits with modulus $q \geq B^L+1$ rather than having to require a modulus $q \geq B^{2^L}$. This method is called \emph{modulus reduction}.
 
-To lower the complexity of the decryption circuit a sufficient amount it is also necessary to lower the dimension of the ciphertext which we are dealing with. This is done with dimension reduction, one should note from the relinearization stage that it isn't necessary to have $s$ and $t$ be of the same dimension. Using this fact, it is possible to convert the ciphertext from using a private key $s$ of dimension $n$ to a private key $t$ of dimension $k$. After these steps have been performed our ciphertext will have reduced noise, and reduced complexity which allows for bootstrapping as an optimization.
+To sufficiently lower the complexity of the decryption circuit it is also necessary to decrease the dimension of the ciphertext which we are dealing with. This is done with \emph{dimension reduction}. One should note from the relinearization stage that it is not necessary to have $s$ and $t$ be of the same dimension. Using this fact, it is possible to convert the ciphertext from using a private key $s$ of dimension $n$ to a private key $t$ of dimension $k$. After these steps have been performed our ciphertext will have reduced noise and reduced complexity, which allows for bootstrapping as an optimization.
 
 The last statement might seem out of place to the reader, as bootstrapping was just described as being very inefficient. However, it can be an optimization if the depth of the circuit is large enough that evaluation on the high-dimension and high-modulus components becomes restrictive. In this case, evaluation on a smaller circuit with bootstrapping to refresh the noise would in fact be an optimization rather than a bottleneck.
-
-Out implementation of the LWE scheme is as described above, in it we implement multiple optimizations to allow for quick computation of the circuit such as the modulus scaling property.
 
 
 %INCOMPLETE
@@ -237,7 +233,7 @@ If you have questions, we will do our best to answer them.
 \bibliography{final_paper}
 
 % this is at the end so it can be one column, on its own page
-\begin{figure}[t]
+\begin{figure}[tp]
 \begin{center}
 \onecolumn
 \begin{tabular}{|c|c|c|c|c|c|} \hline
@@ -252,7 +248,7 @@ Large & 72 & 1460 & 1860 & 249 & 524.3 \\ \hline
 \label{fig:coron}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[tp]
 \begin{center}
 \begin{tabular}{|c|c|c|c|} \hline
 Example size & Security Parameter & 11 operations, depth 1 (s) & 7 operations, depth 2 (s) \\ \hline
