@@ -139,7 +139,7 @@ As mentioned above, this is done though the sparse subset problem. Encrypt value
 With this information the third party is able to evaluate the homomorphic decryption circuit without having to compute $\frac{1}{p}$, reducing the number of computations, and so the depth of the circuit.
 
 \subsubsection{Problems}
-Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, there are many downsides to bootstrapping. The most costly downside is that bootstrapping is a very expensive operation in general. It requires a large amount of time to run\cite{ImplementingGentry} and also can lead to large ciphertexts\cite{NEEDED}. Even with this in mind, many of the early families of fully homomorphic encryption schemes bootstrapped after every operation due to the large amount of noise introducted by their multiplication operation\cite{NEEDED}. There have been several recent advancements in implementations using bootstrapping\cite{StehleSteinfeld, SmartVercuteren, ImplementingGentry, CNT} but the research community has also focused intently on removing the necessity for bootstrapping entirely such as in Learning with Errors, the scheme that was implemented by this paper.
+Gentry's bootstrapping theorem was key to creating a FHE scheme from a SWHE scheme. Unfortunately, there are many downsides to bootstrapping. The most costly downside is that bootstrapping is a very expensive operation in general. It requires a large amount of time to run\cite{ImplementingGentry} and also can lead to large ciphertexts. Even with this in mind, many of the early families of fully homomorphic encryption schemes bootstrapped after every operation due to the large amount of noise introduced by their multiplication operations. There have been several recent advancements in implementations using bootstrapping\cite{StehleSteinfeld, SmartVercauteren, ImplementingGentry, CNT} but the research community has also focused intently on removing the necessity for bootstrapping entirely such as in Learning with Errors, the scheme that was implemented by this paper.
 
 %INCOMPLETE
 \subsection{Learning With Errors Schemes}
@@ -173,7 +173,7 @@ This section is for highlighting what makes our work different from previous wor
 
 We began this project with a thorough investigation of FHE schemes in general, theoretical attacks on insecure schemes, and hardness assumptions and security parameters that current schemes are being based on. With this detailed background we moved toward an implementation stage by taking an existing FHE implementation written in Python SAGE and evaluating its performance. For a fair comparison to this method we then implemented our own version of the standard LWE FHE encryption scheme, also in Python SAGE.
 
-To establish test cases, it was necessary to observe the size of the security parameter in the AGCD implementation and establish an equivelant security parameter to run our LWE implementation with. The other parameters of our scheme, such as the dimension of the original secret key, the size of the modulus and the range of the error term are all determined by our security key in relations established by the implemented paper\cite{NEEDED}. We then evaluated several test cases to benchmark our implementation against theirs using these parameters.
+To establish test cases, it was necessary to observe the size of the security parameter in the AGCD implementation and establish an equivelant security parameter to run our LWE implementation with. The other parameters of our scheme, such as the dimension of the original secret key, the size of the modulus and the range of the error term are all determined by our security key in relations established by the implemented paper\cite{StandardLWE}. We then evaluated several test cases to benchmark our implementation against theirs using these parameters.
 
 This is about the experimental design. Start off with a super high-level description of our approach. A.k.a, given an existing Python SAGE implementation for AGCD, write our own LWE implementation also in Python SAGE, and then benchmark each on a variety of parameters described here. 
 
@@ -219,9 +219,11 @@ Intel i7 2.67 Ghz Quad Core with 24 GB of RAM.
 
 %INCOMPLETE
 \section{Discussion}
-Although the results that we encountered were not what we were hoping for, especially in a code version released to the public, they do demonstrate one of the hardships of creating a fully homomorphic cryptographic system; it is necessary to understand the language which you are working in fully to take advantage of all optimizations available and to avoid all pitfalls.
+The results that we encountered were not exactly what we were hoping for, especially in a code version released to the public, they do demonstrate one of the hardships of creating a fully homomorphic cryptographic system; it is necessary to understand the language which you are working in fully to take advantage of all optimizations available and to avoid all pitfalls.
 
-Although our implementation fell very far from its hopeful goal when being compared against the AGCD version, we feel that this is not an inditement of the LWE system but more a display of the level of optimizations that have been placed into the AGCD program which will be necissary to replicate in our future implementation of the LWE program.
+Although our implementation fell short of its hopeful goal when being compared against the AGCD version, we feel that this is not an inditement of the LWE system but more a display of the level of optimizations that have been placed into the AGCD program which will be necessary to replicate in our future implementation of the LWE program.
+
+It should be noted however that our code does scale better with increased security parameters (fortunately this is where cryptography is done). This is a very good indication that LWE is indeed an asymptotically better solution than AGCD and we feel that further increasing the performance of our code will undoubtable force the break even point much closer to the toy example given.
 
 Can be short. Talk about the main results, particularly the impact. Were our results reasonable or surprising? Do our results mean that we should advocate for LWE or AGCD? Are they too close to call? Or are our results too specific to the implementations and optimizations used? When might we get different results?
 
@@ -229,6 +231,7 @@ Can be short. Talk about the main results, particularly the impact. Were our res
 %INCOMPLETE
 \section{Future Work}
 There are several goals for the future. For this specific code two main goals are to refine it into a more module and adaptable structure for easy modification by a third party for review and experiementation and to optimize it by relying more heavily on Sage structures and experimenting with the fastest methods to do specific tasks. There are also a few more optimizations such as determining minimalistic parameters based on the depth of the circuit. 
+
 Further work can be done to implement and publish other forms of FHE encryption with their associated optimizations, forms such as the AGCD described above and the NTRU-like scheme.
 
 Can be short. Stuff not only that you'd want to do on this project in the future, but what any FHE researcher might try next after having read this.
