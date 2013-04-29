@@ -70,7 +70,6 @@ Since the first FHE scheme was proposed in 2009, combating the performance costs
 
 Recently a scheme was proposed by Brakerski, Gentry, and Vaikuntanathan in \cite{SansBootstrapping} that involves a new branch of FHE based on Learning with Errors that is able to operate without bootstrapping. The authors state explicitly that while their solutions are asymptotically faster, they don't know whether or not they're actually faster in practice than earlier schemes:
 
-
 \begin{quotation}
 ``Performance-wise, this scheme trounces previous (bootstrapping-based) FHE schemes (at least asymptotically; the concrete performance remains to be seen)."
 \end{quotation}
@@ -101,7 +100,7 @@ Following suit, throughout the rest of this paper we assume that the operands $m
 \subsection{Partial Homomorphism}
 Cryptographic schemes that support just one of the two necessary operations are called \emph{partially homomorphic}. The possibility of FHE was first suggested after examining the partially homomorphic properties of RSA in 1978~\cite{Rivest}, although an actual FHE scheme was not successfully devised until over thirty years later.
 
-A cryptographic scheme that supports two operations but only for a limited number of successive operations is called \emph{somewhat homomorphic}. A somewhat homomorphic encryption (SWHE) scheme was crucial to the development of the first FHE scheme and in most every subsequent scheme.
+A cryptographic scheme that supports two operations but only for a limited number of successive operations is called \emph{somewhat homomorphic}. A somewhat homomorphic encryption (SWHE) scheme was crucial to the development of the first FHE scheme and in every subsequent scheme.
 
 %DONE
 \subsection{Lattices}
