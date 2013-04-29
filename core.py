@@ -186,6 +186,3 @@ def modulusReduction(f, svars, n, q, si_subs):
       hbit = (int(hi) >> tau) % 2
       g += hbit*si_subs[i][tau]
   return g
-
-if __name__ == '__main__':
-  main()

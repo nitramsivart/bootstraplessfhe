@@ -1,6 +1,6 @@
+load("core.py")
 import os
 #from core import keygen, encrypt, decrypt
-import core
 from time import time
 
 banner = """-----------------------------------------------------------------
